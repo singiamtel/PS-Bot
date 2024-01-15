@@ -1,0 +1,7 @@
+.env
+node_modules
+db.sqlite
+chat.txt
+customs.json
+config.json
+dist/
