@@ -15,14 +15,12 @@ try {
     fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
 }
 
-
 // Function to get response for a message
 export function answerToCustoms(message: Message) {
     const text = message.content;
     if (!(message.target instanceof Room)) return;
 
     if (message.target.roomid !== 'botdevelopment' && message.target.roomid !== 'dreamyard') {
-    // console.log('Not in botdevelopment or dreamyard, returning..., ', message.target.roomid.split(""), typeof message.target.roomid);
         return;
     }
     if (customs[text]) return message.reply(customs[text]);
