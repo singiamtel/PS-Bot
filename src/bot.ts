@@ -9,7 +9,7 @@ if (process.env.botusername === undefined || process.env.botpassword === undefin
     process.exit(1);
 }
 
-const bot = new Client({ server: 'localhost', port: 8000, username: process.env.botusername, password: process.env.botpassword, debug: true, avatar: 'supernerd', rooms: [] });
+const bot = new Client({ username: process.env.botusername, password: process.env.botpassword, debug: true, avatar: 'supernerd', rooms: [] });
 
 console.log('Connecting to PS!');
 bot.connect();
