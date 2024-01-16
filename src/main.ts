@@ -69,7 +69,7 @@ bot.on('message', (message) => {
 // 2 minutes
 const timer = setTimeout(
     () => {
-        hook.send('@bad Couldn\'t login');
+        hook.send('<@&1196484431062515752> Bad');
     },
     1000 * 60 * 2,
 );
