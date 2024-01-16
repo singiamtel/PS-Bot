@@ -50,6 +50,7 @@ export function addCustom(message : Message) {
         fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
         return message.reply('Custom deleted.');
     } else if (message.content.startsWith('#showcustom') || message.content.startsWith('#customs') || message.content.startsWith('#listcustom')) {
+        console.log('showing customs');
         return message.reply(`!code ${Object.keys(customs).join(`
 `)
         }`);
