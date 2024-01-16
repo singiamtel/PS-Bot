@@ -49,8 +49,7 @@ export function addCustom(message : Message) {
         // Save the updated customs to the file
         fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
         return message.reply('Custom deleted.');
-    } else if (message.content.startsWith('#showcustoms')) {
-        // Only keys
+    } else if (message.content.startsWith('#showcustom') || message.content.startsWith('#customs') || message.content.startsWith('#listcustom')) {
         return message.reply(`!code ${Object.keys(customs).join(`
 `)
         }`);
