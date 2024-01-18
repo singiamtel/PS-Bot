@@ -1,3 +1,7 @@
+import { Message, Room, User } from 'ps-client';
+import { whitelist } from './config';
+import bot from './bot';
+
 export const usernameify = (username:string) =>
     username?.toLowerCase().replace(/[^a-z0-9]/g, '').trim() || 'unknown';
 
@@ -16,8 +20,6 @@ export const rankOrder = {
     '^': 2,
 };
 
-export const isAuth = (user: string) => user && user[0] in rankOrder;
-
 export function formatDate(date: Date) {
     return (
         [
@@ -32,4 +34,26 @@ export function formatDate(date: Date) {
         padTo2Digits(date.getSeconds()),
     ].join(':')
     );
+}
+
+export function isAuth(message: Message, room?: string) {
+    if (room) {
+        const authObject = bot.getRoom(room).auth;
+        // console.log('authobj', authObject);
+        if (authObject) {
+            const authList = Object.entries(bot.getRoom(room).auth).filter(([rank, userArray]) => rankOrder[rank as keyof typeof rankOrder] > 4).map(([rank, userArray]) => userArray).flat();
+            return authList.includes(usernameify(message.author?.name));
+        }
+    }
+
+    return (message.msgRank !== ' ' && message.msgRank !== '+') || whitelist.includes(usernameify(message.author?.name));
+}
+
+export function isRoom(target: User | Room): target is Room {
+    return target instanceof Room;
+}
+
+export function inAllowedRooms(message: Message, rooms: string[]) {
+    rooms.push('botdevelopment'); // Allow bot development
+    return isRoom(message.target) && rooms.includes(message.target.roomid);
 }

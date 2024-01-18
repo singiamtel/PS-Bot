@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { usernameify } from './utils.js';
+import { isAuth, usernameify } from './utils.js';
 import { whitelist } from './config.js';
 import { loadCustomColors } from './namecolour.js';
 import bot from './bot.js';
@@ -14,7 +14,7 @@ import { saveChat } from './mods/saveChat.js';
 import { ttp } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
-
+import { MBaddPoints, MBcreateQuestion, MBleaderboard, MBrank } from './mods/mysterybox.js';
 
 bot.on('message', (message) => {
     if (message.isIntro || message.author?.name === bot.status.username) return;
@@ -26,14 +26,17 @@ bot.on('message', (message) => {
     // Public for all
     saveChat(message, who);
     apologyCounter(message, who);
+    MBrank(message);
 
-    const isAuth = message.msgRank !== ' ' && message.msgRank !== '+';
     // Not voice
     if (message.msgRank !== ' ') {
         answerToCustoms(message);
     }
     // Auth-only
-    if (isAuth || whitelist.includes(who)) {
+    MBcreateQuestion(message);
+    if (isAuth(message) || whitelist.includes(who)) {
+        MBleaderboard(message);
+        MBaddPoints(message);
         addCustom(message);
         randopple(message);
         ttp(message);

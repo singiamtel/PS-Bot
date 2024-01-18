@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { usernameify as toID } from './utils.js';
+import { usernameify as toID } from './utils';
 
 // Author: Felucia
 function userColorHash(name) {
