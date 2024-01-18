@@ -1,5 +1,5 @@
 import { Message, Room, User } from 'ps-client';
-import { whitelist } from './config';
+import { whitelist } from './config.js';
 import bot from './bot';
 
 export const usernameify = (username:string) =>
