@@ -1,6 +1,6 @@
 import { Message, Room, User } from 'ps-client';
 import { whitelist } from './config.js';
-import bot from './bot';
+import bot from './bot.js';
 
 export const usernameify = (username:string) =>
     username?.toLowerCase().replace(/[^a-z0-9]/g, '').trim() || 'unknown';

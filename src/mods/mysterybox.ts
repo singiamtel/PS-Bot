@@ -1,7 +1,7 @@
 import { Message } from 'ps-client';
-import db from '../db';
-import { inAllowedRooms, isAuth, isRoom, usernameify } from '../utils';
-import bot from '../bot';
+import db from '../db.js';
+import { inAllowedRooms, isAuth, isRoom, usernameify } from '../utils.js';
+import bot from '../bot.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
