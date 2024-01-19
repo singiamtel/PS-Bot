@@ -36,7 +36,10 @@ export function addCustom(message : Message) {
         if (customs[args[0]]) return message.reply('That custom already exists.');
         const [key, value] = [args[0].trim(), args.slice(1).join(',').trim()];
         if (!key || !value) return message.reply('Invalid format. Use #addcustom key,value');
-        if (value.startsWith('/') || value.startsWith('!')) return message.reply('No commands allowed.');
+        if (value.startsWith('/') || value.startsWith('!')) {
+            const cmd = value.slice(1).split(' ')[0];
+            if (!['show', 'me', 'code'].includes(cmd)) return message.reply('No commands allowed.');
+        }
         customs[key] = value;
         // Save the updated customs to the file
         fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
