@@ -57,3 +57,18 @@ export function inAllowedRooms(message: Message, rooms: string[]) {
     rooms.push('botdevelopment'); // Allow bot development
     return isRoom(message.target) && rooms.includes(message.target.roomid);
 }
+
+export function toOrdinal(num: number) {
+    if (num === 1) return '1st';
+    if (num === 2) return '2nd';
+    if (num === 3) return '3rd';
+    return num + 'th';
+}
+
+export function formatTop3(users: string[]) {
+    // return the first 3 elements, with a comma between the first 2 and an 'and' before the last one. If there are only 2 elements, return them with an 'and' between them
+    if (users.length === 0) return '';
+    if (users.length === 1) return users[0];
+    if (users.length === 2) return users.join(' and ');
+    return users.slice(0, 2).join(', ') + ', and ' + users[2];
+}

@@ -1,34 +1,94 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
-import { inAllowedRooms, isAuth, isRoom, usernameify } from '../utils.js';
+import { formatTop3, inAllowedRooms, isAuth, isRoom, toOrdinal, usernameify } from '../utils.js';
 import bot from '../bot.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
 
 // Function to get response for a message
-let onGoingQuestion = false;
-export function MBcreateQuestion(message: Message) {
-    const hostRoom = 'botdevelopment';
-    const text = message.content;
-    if (!isAuth(message, 'petsanimals')) {
+type OnGoingQuestion = {question: string, answer: string, type: 'text', image?: string}
+let onGoingQuestion : OnGoingQuestion | null = null;
+const winners: string[] = [];
+
+function endQuestion(hostRoom: string) {
+    if (!onGoingQuestion) {
+        console.error('Trying to end a question but there is no question being created.');
         return;
     }
-    if (text.startsWith('#newquestion')) {
+    const host = bot.getRoom(hostRoom);
+    if (!host) {
+        console.error('Trying to end a question but bot is not in host room.');
+        return;
+    }
+    if (winners.length === 0) {
+        host.send(`/adduhtml question, The question has ended. No one answered correctly :(`);
+        return;
+    } else {
+        // 5 points for first, 3 for second, 2 for third, 1 for everyone else
+        winners.forEach((winner, idx) => {
+            const points = idx === 0 ? 5 : idx === 1 ? 3 : idx === 2 ? 2 : 1;
+            addPointsToUser(winner, points, () => {});
+        });
+        // announce the 3 first winners, and how many points everyone got
+        host.send(`/adduhtml question, The question has ended. Congratulations to **${formatTop3(winners)}** for being the first to answer correctly!. Everyone else who answered correctly also gets 1 point.`);
+        winners.length = 0;
+        return;
+    }
+}
+
+function startQuestion(hostRoom: string, { question, answer, type, image }: OnGoingQuestion): boolean {
+    if (onGoingQuestion) {
+        console.error('Trying to start a question but there is already a question being created.');
+        return false;
+    }
+    const host = bot.getRoom(hostRoom);
+    if (!host) {
+        console.error('Trying to start a question but bot is not in host room.');
+        return false;
+    }
+    onGoingQuestion = { question, answer, type, image };
+    // host.send(`/adduhtml question, A new Mystery Box question has been created! <b>${question}</b> <form data-submitsend="/msg ${process.env.botusername}, #answer {test}"><input name="test" type="text"/><button>Submit response</button></form>`);
+    host.send(`/adduhtml question, A new Mystery Box question has been created! <b>${onGoingQuestion.question}</b> <br> Answer it with <code>/msg ${process.env.botusername}, #answer [answer]</code>`);
+    setTimeout(() => {
+        endQuestion(hostRoom);
+    }, 15 * 1000);
+    return true;
+}
+
+
+export function MBcreateQuestion(message: Message) {
+    const hostRoom = 'botdevelopment'; // TODO: Change this to the real host room
+    const text = message.content;
+    if (text.startsWith('#answer')) {
+        if (isRoom(message.target)) {
+            message.reply('Please answer the question in a private message!');
+            message.reply(`/clearlines ${message.author.id}, 1`);
+            return;
+        }
+        if (!onGoingQuestion) return message.reply('There is no question being created. Please create one first.');
+        const answer = text.split(' ').slice(1).join(' ');
+        if (winners.includes(message.author.id)) return message.reply('You already answered correctly. Please wait for the next question.');
+        if (answer.toLowerCase().trim() === onGoingQuestion.answer.toLowerCase().trim()) {
+            winners.push(message.author.id);
+            message.reply(`Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly.`);
+            return;
+        } else {
+            message.reply('Wrong answer, please try again.');
+            return;
+        }
+    }
+    if (!isAuth(message, 'petsanimals')) {
+        return;
+    } else if (text.startsWith('#newquestion')) {
         if (onGoingQuestion) return message.reply('There is already a question being created. Please wait until it finishes.');
         const args = text.split(' ').slice(1).join(' ').split(',');
         let _type, image, question, answer;
-        console.log(args);
         let host;
         switch (args[0]) {
             case 'text':
                 [_type, question, answer] = args;
-                onGoingQuestion = true;
-                // send question to host room. the host room is not the room the command was sent in
-                host = bot.getRoom(hostRoom);
-                if (!host) return message.reply('Bot is not in host room. Please report this to an admin.');
-                // bot.getRoom(hostRoom).send(`!htmlbox <b>${question}</b>`);
-                host.send(`/adduhtml question, A new Mystery Box question has been created! <b>${question}</b><br>Please answer by sending me a PM with the answer with the following command: <code>#answer ${answer}</code>`);
+                startQuestion(hostRoom, { question, answer, type: 'text' });
                 break;
             case 'help':
                 message.reply(`!code #newquestion help
@@ -49,12 +109,36 @@ Make sure to use a direct link to the image, not a link to a page containing the
                 break;
             case 'image':
                 [_type, image, question, answer] = args;
-                console.log('image', image);
                 break;
             default:
                 return message.reply('Please specify a valid question type. Valid types are: text, image');
         }
     }
+}
+
+
+function addPointsToUser(user: string, points: number, cb: () => void) {
+    db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
+        if (err) return console.error(err);
+        if (!rows || rows.length === 0) {
+            const query = `INSERT INTO mysterybox(name, points) VALUES(? , ?)`;
+            db.run(query, [user, points], err => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                cb();
+            });
+        } else {
+            db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + (rows[0] as any).points, user], err => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                cb();
+            });
+        }
+    });
 }
 
 export function MBaddPoints(message: Message) {
@@ -67,28 +151,29 @@ export function MBaddPoints(message: Message) {
         if (!name || !points) return message.reply('Please specify a user and points.');
         const user = usernameify(name);
         if (user === 'unknown') return message.reply('Please specify a user.');
-        db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-            if (err) {
-                console.error('here', err, rows, user);
-                return;
-            }
-            if (!rows || rows.length === 0) {
-                const query = `INSERT INTO mysterybox(name, points) VALUES(? , ?)`;
-                db.run(query, [user, points], err => {
-                    if (err) {
-                        console.error('here2', query, err);
-                        return;
-                    }
-                    return message.reply(`Added ${points} points to ${name} for a total of ${points} points.`);
-                });
-            } else {
-                db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + (rows[0] as any).points, user], err => {
-                    if (err) return console.error(err);
-                    console.log(rows);
-                    return message.reply(`Added ${points} points to ${name} for a total of ${Number((rows[0] as any).points) + Number(points)} points.`);
-                });
-            }
-        });
+        // db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
+        //     if (err) {
+        //         console.error('here', err, rows, user);
+        //         return;
+        //     }
+        //     if (!rows || rows.length === 0) {
+        //         const query = `INSERT INTO mysterybox(name, points) VALUES(? , ?)`;
+        //         db.run(query, [user, points], err => {
+        //             if (err) {
+        //                 console.error('here2', query, err);
+        //                 return;
+        //             }
+        //             return message.reply(`Added ${points} points to ${name} for a total of ${points} points.`);
+        //         });
+        //     } else {
+        //         db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + (rows[0] as any).points, user], err => {
+        //             if (err) return console.error(err);
+        //             console.log(rows);
+        //             return message.reply(`Added ${points} points to ${name} for a total of ${Number((rows[0] as any).points) + Number(points)} points.`);
+        //         });
+        //     }
+        // });
+        addPointsToUser(user, points, () => message.reply(`Added ${points} points to ${name} for a total of ${points} points.`));
     }
 }
 
