@@ -31,7 +31,7 @@ function endQuestion(hostRoom: string) {
             addPointsToUser(winner, points, () => {});
         });
         // announce the 3 first winners, and how many points everyone got
-        host.send(`/adduhtml question, The question has ended. Congratulations to <b>${formatTop3(winners)}</b> for being the first to answer correctly!. Everyone else who answered correctly also gets 1 point.`);
+        host.send(`/adduhtml question, The question has ended. Congratulations to <b>${formatTop3(winners)}</b> for being the first to answer correctly! Everyone else who answered correctly also gets 1 point.`);
         winners.length = 0;
         return;
     }
