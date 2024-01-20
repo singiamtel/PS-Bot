@@ -17,7 +17,7 @@ try {
 
 // Function to get response for a message
 export function answerToCustoms(message: Message) {
-    const text = message.content;
+    const text = message.content.trim().toLowerCase();
     if (!(message.target instanceof Room)) return;
 
     if (message.target.roomid !== 'botdevelopment' && message.target.roomid !== 'dreamyard') {
@@ -34,7 +34,7 @@ export function addCustom(message : Message) {
     if (message.content.startsWith('#addcustom')) {
         const args = message.content.split(' ').slice(1).join(' ').split(',');
         if (customs[args[0]]) return message.reply('That custom already exists.');
-        const [key, value] = [args[0].trim(), args.slice(1).join(',').trim()];
+        const [key, value] = [args[0].trim().toLowerCase(), args.slice(1).join(',').trim()];
         if (!key || !value) return message.reply('Invalid format. Use #addcustom key,value');
         if (value.startsWith('/') || value.startsWith('!')) {
             const cmd = value.slice(1).split(' ')[0];
