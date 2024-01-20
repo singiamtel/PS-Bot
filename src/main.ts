@@ -11,7 +11,7 @@ import { politicalCompass } from './mods/political_compass.js';
 import { nameColour } from './mods/namecolour.js';
 import { addCustom, answerToCustoms } from './mods/customs.js';
 import { saveChat } from './mods/saveChat.js';
-import { ttp } from './mods/ttp.js';
+import { ttp, ttp2 } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
 import { MBaddPoints, MBcreateQuestion, MBleaderboard, MBrank } from './mods/mysterybox.js';
@@ -40,6 +40,7 @@ bot.on('message', (message) => {
         addCustom(message);
         randopple(message);
         ttp(message);
+        ttp2(message);
         nameColour(message, bot.status.username);
         apologyShower(message);
     }
