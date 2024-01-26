@@ -20,6 +20,6 @@ export function nameColour(message: Message, username: string | undefined) {
         const colour2 = determineColour(toID(name2));
         const delta = hexColorDelta(colour1, colour2);
         const fixedDelta = (delta * 100).toFixed(2);
-        return message.reply(`${name1}(${colour1}) and ${name2}(${colour2}) are ~${fixedDelta}% similar`);
+        return message.reply(`${name1} (${colour1}) and ${name2} (${colour2}) are ~${fixedDelta}% similar`);
     }
 }
