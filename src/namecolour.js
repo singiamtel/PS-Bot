@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { toID } from 'ps-client/tools';
+import { toID } from 'ps-client/tools.js';
 
 // Author: Felucia
 function userColorHash(name) {

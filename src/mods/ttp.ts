@@ -1,5 +1,5 @@
 import { Message } from 'ps-client';
-import { isCmd } from '../utils';
+import { isCmd } from '../utils.js';
 
 const TTPurl = process.env.TTPurl || 'https://home.showcord.com/TTP/';
 

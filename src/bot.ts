@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { Client, Message } from 'ps-client';
-import { toID } from 'ps-client/tools';
+import { toID } from 'ps-client/tools.js';
 
 if (process.env.botusername === undefined || process.env.botpassword === undefined) {
     console.error('No username or password found in .env file. Exiting...');

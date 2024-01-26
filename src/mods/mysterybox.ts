@@ -1,120 +1,68 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
 import { formatTop3, inAllowedRooms, isCmd, isRoom, toOrdinal } from '../utils.js';
-import client, { isAuth } from '../bot.js';
+import client, { config, isAuth } from '../bot.js';
+import fs from 'fs';
 
 import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
 dotenv.config();
 
-// Function to get response for a message
-type OnGoingQuestion = {question: string, answer: string, type: 'text', image?: string}
-let onGoingQuestion : OnGoingQuestion | null = null;
-const winners: string[] = [];
+// stored in answer.txt, loaded on startup
+// if file doesn't exist, it will be created
+if (!fs.existsSync('./answer.txt')) {
+    fs.writeFileSync('./answer.txt', '');
+}
+const answer = fs.readFileSync('./answer.txt').toString().toLowerCase().trim();
 
-function endQuestion(hostRoom: string) {
-    if (!onGoingQuestion) {
-        console.error('Trying to end a question but there is no question being created.');
-        return;
-    }
-    const host = client.getRoom(hostRoom);
-    if (!host) {
-        console.error('Trying to end a question but bot is not in host room.');
-        return;
-    }
-    if (winners.length === 0) {
-        host.send(`/adduhtml question, The question has ended. No one answered correctly :(`);
-        // return;
-    } else {
-        // 5 points for first, 3 for second, 2 for third, 1 for everyone else
-        winners.forEach((winner, idx) => {
-            const points = idx === 0 ? 5 : idx === 1 ? 3 : idx === 2 ? 2 : 1;
-            addPointsToUser(winner, points, () => {});
-        });
-        // announce the 3 first winners, and how many points everyone got
-        host.send(`/adduhtml question, The question has ended. Congratulations to <b>${formatTop3(winners)}</b> for being the first to answer correctly! Everyone else who answered correctly also gets 1 point.`);
-        winners.length = 0;
-        // return;
-    }
-    onGoingQuestion = null;
+if (!fs.existsSync('./winners.txt')) {
+    fs.writeFileSync('./winners.txt', '');
 }
 
-function startQuestion(hostRoom: string, { question, answer, type, image }: OnGoingQuestion): boolean {
-    if (onGoingQuestion) {
-        console.error('Trying to start a question but there is already a question being created.');
-        return false;
-    }
-    const host = client.getRoom(hostRoom);
-    if (!host) {
-        console.error('Trying to start a question but bot is not in host room.');
-        return false;
-    }
-    onGoingQuestion = { question, answer, type, image };
-    // host.send(`/adduhtml question, A new Mystery Box question has been created! <b>${question}</b> <form data-submitsend="/msg ${process.env.botusername}, #answer {test}"><input name="test" type="text"/><button>Submit response</button></form>`);
-    host.send(`/adduhtml question, A new Mystery Box question has been created! <b>${onGoingQuestion.question}</b> <br> Answer it with <code>/msg ${process.env.botusername}, #answer [answer]</code>`);
-    setTimeout(() => {
-        endQuestion(hostRoom);
-    }, 60 * 1000);
-    return true;
+const winners = fs.readFileSync('./winners.txt').toString().split('\n').map(toID).filter(Boolean);
+
+function addWinner(id: string) {
+    winners.push(id);
+    fs.writeFileSync('./winners.txt', winners.join('\n'));
 }
 
 
-export function MBcreateQuestion(message: Message) {
+export function MBsetAnswer(message: Message) {
+    if (!isAuth(message, 'petsanimals')) {
+        return;
+    } else if (isCmd(message, 'newquestion')) {
+        if (answer) return message.reply(`There is already a question being created. You can use ${config.prefix}endquestion to end it.`);
+    }
+}
+
+export function MBanswerQuestion(message: Message) {
     const hostRoom = 'botdevelopment'; // TODO: Change this to the real host room
     // const hostRoom = 'groupchat-itszxc-44323579';
     const text = message.content;
     if (isCmd(message, 'answer')) {
+        const attempt = text.split(' ').slice(1).join(' ');
         if (isRoom(message.target)) {
             message.reply('Please answer the question in a private message!');
             message.reply(`/clearlines ${message.author.id}, 1`);
             return;
         }
-        if (!onGoingQuestion) return message.reply('There is no question being created. Please create one first.');
-        const answer = text.split(' ').slice(1).join(' ');
+        if (!answer) return message.reply('There is no question being created. Please create one first.');
         if (winners.includes(message.author.id)) return message.reply('You already answered correctly. Please wait for the next question.');
-        if (answer.toLowerCase().trim() === onGoingQuestion.answer.toLowerCase().trim()) {
+        if (answer === attempt.toLowerCase().trim()) {
             winners.push(message.author.id);
             message.reply(`Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly.`);
+            if (winners.length <= 3) {
+                const room = client.rooms.get(hostRoom);
+                if (!room) {
+                    console.error('Room not found');
+                    return;
+                }
+                room.send(`/adduhtml MB${winners.length}, <div class="broadcast-blue"><center><h3><username>${message.author.name}</username> has answered in ${toOrdinal(winners.length)} place!</h3></center></div>`);
+            }
             return;
         } else {
             message.reply('Wrong answer, please try again.');
             return;
-        }
-    }
-    if (!isAuth(message, 'petsanimals')) {
-        return;
-    } else if (isCmd(message, 'newquestion')) {
-        if (onGoingQuestion) return message.reply('There is already a question being created. Please wait until it finishes.');
-        const args = text.split(' ').slice(1).join(' ').split(',');
-        let _type, image, question, answer;
-        let host;
-        switch (args[0]) {
-            case 'text':
-                [_type, question, answer] = args;
-                startQuestion(hostRoom, { question, answer, type: 'text' });
-                break;
-            case 'help':
-                message.reply(`!code #newquestion help
-
-The mystery box is a game where users can earn points by answering questions.
-The questions can be either text or image based.
-To add a new text question, use the following command:
-  #newquestion text, <question>, <answer>
-For example:
-  #newquestion text, What is the capital of the United States?, Washington
-
-To add a new image question, use the following command:
-  #newquestion image, <image url>, <question>, <answer>
-For example:
-  #newquestion image, https://i.imgur.com/0nZkQfF.jpg, What is the name of this animal?, cat
-Make sure to use a direct link to the image, not a link to a page containing the image.
-`);
-                break;
-            case 'image':
-                [_type, image, question, answer] = args;
-                break;
-            default:
-                return message.reply('Please specify a valid question type. Valid types are: text, image');
         }
     }
 }

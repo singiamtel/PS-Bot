@@ -1,5 +1,5 @@
 import { Message } from 'ps-client';
-import { isCmd } from '../utils';
+import { isCmd } from '../utils.js';
 
 const TTPurl = 'https://home.showcord.com/opples/';
 const nOpples = 3;
