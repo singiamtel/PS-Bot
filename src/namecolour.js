@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { usernameify as toID } from './utils.js';
+import { toID } from 'ps-client/tools';
 
 // Author: Felucia
 function userColorHash(name) {
@@ -630,9 +630,9 @@ export function determineColour(name) {
 
 
 export function hexColorDelta(hex1, hex2) {
-	// remove the # from the hex colors
-	hex1 = hex1.replace("#", "");
-	hex2 = hex2.replace("#", "");
+    // remove the # from the hex colors
+    hex1 = hex1.replace('#', '');
+    hex2 = hex2.replace('#', '');
     // get red/green/blue int values of hex1
     var r1 = parseInt(hex1.substring(0, 2), 16);
     var g1 = parseInt(hex1.substring(2, 4), 16);

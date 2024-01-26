@@ -1,9 +1,7 @@
 import fs from 'fs';
 
-import { isAuth, usernameify } from './utils.js';
-import { whitelist } from './config.js';
 import { loadCustomColors } from './namecolour.js';
-import bot from './bot.js';
+import client, { config, isAuth } from './bot.js';
 
 // Mods
 import { apologyCounter, apologyShower } from './mods/apologies.js';
@@ -15,17 +13,19 @@ import { ttp, ttp2 } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
 import { MBaddPoints, MBcreateQuestion, MBleaderboard, MBrank } from './mods/mysterybox.js';
+import { toID } from 'ps-client/tools.js';
+import { isCmd } from './utils.js';
 
-bot.on('message', (message) => {
-    if (message.isIntro || message.author?.name === bot.status.username) return;
-    const who = usernameify(message.author?.name);
-    console.log(`message from ${who}: ${message.content}`);
+client.on('message', (message) => {
+    if (message.isIntro || message.author?.name === client.status.username) return;
+    const username = toID(message.author?.name);
 
-    if (who === 'unknown') return; // System messages
+    if (!username) return; // System messages
+    console.log(`message from ${username}: ${message.content}`);
 
     // Public for all
-    saveChat(message, who);
-    apologyCounter(message, who);
+    saveChat(message, username);
+    apologyCounter(message, username);
     MBrank(message);
 
     // Not voice
@@ -34,23 +34,23 @@ bot.on('message', (message) => {
     }
     // Auth-only
     MBcreateQuestion(message);
-    if (isAuth(message) || whitelist.includes(who)) {
+    if (isAuth(message) || config.whitelist.includes(username)) {
         MBleaderboard(message);
         MBaddPoints(message);
         addCustom(message);
         randopple(message);
         ttp(message);
         ttp2(message);
-        nameColour(message, bot.status.username);
+        nameColour(message, client.status.username);
         apologyShower(message);
     }
 
-    if (!whitelist.includes(who)) return;
+    if (!config.whitelist.includes(username)) return;
     // Me only
 
-    politicalCompass(message, who);
+    politicalCompass(message, username);
 
-    if (message.content.startsWith('#eval')) {
+    if (isCmd(message, 'eval')) {
         const code = message.content.split(' ').slice(1).join(' ');
         try {
             const result = eval(code);
@@ -78,21 +78,21 @@ const timer = setTimeout(
     1000 * 60 * 2,
 );
 
-let config = {
+let __config = {
     rooms: [],
 };
 try {
     const data = fs.readFileSync('config.json', 'utf8');
-    config = JSON.parse(data);
+    __config = JSON.parse(data);
 } catch (err) {
     console.log('No config.json file found. Creating one...');
-    fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
+    fs.writeFileSync('config.json', JSON.stringify(__config, null, 2), 'utf8');
 }
 
-bot.on('login', () => {
+client.on('login', () => {
     console.log('Connected to chat');
     clearTimeout(timer);
     loadCustomColors();
-    bot.send(`|/autojoin ${config.rooms.join(',')}`);
+    client.send(`|/autojoin ${__config.rooms.join(',')}`);
     // check('zarel');
 });

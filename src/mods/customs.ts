@@ -1,9 +1,10 @@
 // const fs = require("fs");
 import fs from 'fs';
-import { whitelist } from '../config.js';
-import { usernameify } from '../utils.js';
 import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
+import { config } from '../bot.js';
+import { toID } from 'ps-client/tools.js';
+import { isCmd } from '../utils.js';
 
 // Load and parse the customs.json file
 let customs : {[key: string]: string} = {};
@@ -28,10 +29,11 @@ export function answerToCustoms(message: Message) {
 
 // Function to add a custom message-response pair
 export function addCustom(message : Message) {
-    if (message.msgRank !== '#' && !whitelist.includes(usernameify(message.author?.name))) {
+    const isRoomOwner = message.msgRank !== '#';
+    if (!isRoomOwner && !config.whitelist.includes(toID(message.author?.name))) {
         return;
     }
-    if (message.content.startsWith('#addcustom')) {
+    if (isCmd(message, 'addcustom')) {
         const args = message.content.split(' ').slice(1).join(' ').split(',');
         if (customs[args[0]]) return message.reply('That custom already exists.');
         const [key, value] = [args[0].trim().toLowerCase(), args.slice(1).join(',').trim()];
@@ -44,7 +46,7 @@ export function addCustom(message : Message) {
         // Save the updated customs to the file
         fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
         return message.reply('Custom added.');
-    } else if (message.content.startsWith('#delcustom')) {
+    } else if (isCmd(message, ['deletecustom', 'removecustom', 'delcustom'])) {
         // Delete a custom
         const args = message.content.split(' ').slice(1).join(' ').split(',');
         if (!customs[args[0]]) return message.reply('That custom doesn\'t exist.');
@@ -52,7 +54,7 @@ export function addCustom(message : Message) {
         // Save the updated customs to the file
         fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
         return message.reply('Custom deleted.');
-    } else if (message.content.startsWith('#showcustom') || message.content.startsWith('#customs') || message.content.startsWith('#listcustom')) {
+    } else if (isCmd(message, ['showcustom', 'customs', 'listcustom'])) {
         console.log('showing customs');
         return message.reply(`!code ${Object.keys(customs).join(`
 `)

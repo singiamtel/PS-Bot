@@ -1,9 +1,10 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
-import { formatTop3, inAllowedRooms, isAuth, isRoom, toOrdinal, usernameify } from '../utils.js';
-import bot from '../bot.js';
+import { formatTop3, inAllowedRooms, isCmd, isRoom, toOrdinal } from '../utils.js';
+import client, { isAuth } from '../bot.js';
 
 import dotenv from 'dotenv';
+import { toID } from 'ps-client/tools.js';
 dotenv.config();
 
 // Function to get response for a message
@@ -16,14 +17,14 @@ function endQuestion(hostRoom: string) {
         console.error('Trying to end a question but there is no question being created.');
         return;
     }
-    const host = bot.getRoom(hostRoom);
+    const host = client.getRoom(hostRoom);
     if (!host) {
         console.error('Trying to end a question but bot is not in host room.');
         return;
     }
     if (winners.length === 0) {
         host.send(`/adduhtml question, The question has ended. No one answered correctly :(`);
-        return;
+        // return;
     } else {
         // 5 points for first, 3 for second, 2 for third, 1 for everyone else
         winners.forEach((winner, idx) => {
@@ -33,8 +34,9 @@ function endQuestion(hostRoom: string) {
         // announce the 3 first winners, and how many points everyone got
         host.send(`/adduhtml question, The question has ended. Congratulations to <b>${formatTop3(winners)}</b> for being the first to answer correctly! Everyone else who answered correctly also gets 1 point.`);
         winners.length = 0;
-        return;
+        // return;
     }
+    onGoingQuestion = null;
 }
 
 function startQuestion(hostRoom: string, { question, answer, type, image }: OnGoingQuestion): boolean {
@@ -42,7 +44,7 @@ function startQuestion(hostRoom: string, { question, answer, type, image }: OnGo
         console.error('Trying to start a question but there is already a question being created.');
         return false;
     }
-    const host = bot.getRoom(hostRoom);
+    const host = client.getRoom(hostRoom);
     if (!host) {
         console.error('Trying to start a question but bot is not in host room.');
         return false;
@@ -52,15 +54,16 @@ function startQuestion(hostRoom: string, { question, answer, type, image }: OnGo
     host.send(`/adduhtml question, A new Mystery Box question has been created! <b>${onGoingQuestion.question}</b> <br> Answer it with <code>/msg ${process.env.botusername}, #answer [answer]</code>`);
     setTimeout(() => {
         endQuestion(hostRoom);
-    }, 15 * 1000);
+    }, 60 * 1000);
     return true;
 }
 
 
 export function MBcreateQuestion(message: Message) {
     const hostRoom = 'botdevelopment'; // TODO: Change this to the real host room
+    // const hostRoom = 'groupchat-itszxc-44323579';
     const text = message.content;
-    if (text.startsWith('#answer')) {
+    if (isCmd(message, 'answer')) {
         if (isRoom(message.target)) {
             message.reply('Please answer the question in a private message!');
             message.reply(`/clearlines ${message.author.id}, 1`);
@@ -80,7 +83,7 @@ export function MBcreateQuestion(message: Message) {
     }
     if (!isAuth(message, 'petsanimals')) {
         return;
-    } else if (text.startsWith('#newquestion')) {
+    } else if (isCmd(message, 'newquestion')) {
         if (onGoingQuestion) return message.reply('There is already a question being created. Please wait until it finishes.');
         const args = text.split(' ').slice(1).join(' ').split(',');
         let _type, image, question, answer;
@@ -143,13 +146,13 @@ function addPointsToUser(user: string, points: number, cb: () => void) {
 
 export function MBaddPoints(message: Message) {
     const text = message.content;
-    if (text.startsWith('#addp')) {
+    if (isCmd(message, 'addp')) {
         const args = text.split(' ').slice(1);
         const [name, _points] = args.join(' ').split(',');
         const points = Number(_points);
         if (isNaN(points)) return message.reply('Please specify a valid number of points.');
         if (!name || !points) return message.reply('Please specify a user and points.');
-        const user = usernameify(name);
+        const user = toID(name);
         if (user === 'unknown') return message.reply('Please specify a user.');
         // db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
         //     if (err) {
@@ -179,12 +182,11 @@ export function MBaddPoints(message: Message) {
 
 
 export function MBleaderboard(message: Message) {
-    const text = message.content;
     if (!isAuth(message)) {
         console.log('not auth');
         return;
     }
-    if (text.startsWith('#leaderboard') || text.startsWith('#lb')) {
+    if (isCmd(message, ['leaderboard', 'lb'])) {
         db.all('SELECT * FROM mysterybox ORDER BY points DESC LIMIT 10', (err, rows:any) => {
             if (err) return console.error(err);
             const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row:any, idx: number) => `<tr><td style="border:1px solid; padding:3px">${idx === 0 ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
@@ -194,13 +196,12 @@ export function MBleaderboard(message: Message) {
 }
 
 export function MBrank(message: Message) {
-    const text = message.content;
     if (isRoom(message.target) && !inAllowedRooms(message, ['petsanimals'])) {
         return;
     }
-    if (text.startsWith('#rank')) {
+    if (isCmd(message, 'rank')) {
         const displayname = message.content.split(' ').slice(1).join(' ');
-        const user = usernameify(displayname);
+        const user = toID(displayname);
         if (user === 'unknown') return message.reply('Please specify a user.');
         db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
             if (err) return console.error(err);

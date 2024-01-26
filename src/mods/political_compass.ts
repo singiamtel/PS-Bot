@@ -2,19 +2,20 @@
 import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import db from '../db.js';
-import { usernameify } from '../utils.js';
 import { URL } from 'node:url';
+import { toID } from 'ps-client/tools.js';
+import { isCmd } from '../utils.js';
 
 export function politicalCompass(message: Message, username: string) {
     if (username === 'unknown') {
         console.log('Unknown user: ' + message.author.name);
         return;
     }
-    if (/#addpc/.test(message.content)) {
+    if (isCmd(message, 'addpc')) {
         // ec = economic
         // so = social
         let user = message.content.split(' ')[1];
-        user = usernameify(user);
+        user = toID(user);
         const curr_url_tmp = message.content.split(' ')[2];
         if (curr_url_tmp === undefined) {
             message.reply('You need to provide a URL! (fill https://www.politicalcompass.org/test and paste the URL with your results when you are done)');
@@ -60,10 +61,10 @@ export function politicalCompass(message: Message, username: string) {
                 });
             }
         });
-    } else if (/#pc /.test(message.content)) {
+    } else if (isCmd(message, 'pc')) {
         // find the user in the database
         const user = message.content.split(' ').slice(1).join(' ');
-        const username = usernameify(user);
+        const username = toID(user);
         db.get('SELECT * FROM pc WHERE name = ?', [username], (err, row) => {
             if (err) {
                 console.log(err);
@@ -78,7 +79,7 @@ export function politicalCompass(message: Message, username: string) {
                 message.reply(`${user} political compass is ${econ}, ${soc}. https://www.politicalcompass.org/analysis2?ec=${econ}&soc=${soc}`);
             }
         });
-    } else if (/#pcall/.test(message.content)) {
+    } else if (isCmd(message, 'pcall')) {
         //check the type of channel
         if (!(message.target instanceof Room)) { return; }
         if (message.target.type !== 'chat') {
@@ -88,7 +89,7 @@ export function politicalCompass(message: Message, username: string) {
         const onlineUsers = JSON.parse(JSON.stringify(message.target.users));
         onlineUsers.forEach((user: any, index: any) => {
             // remove the user's first character and usernameify it
-            onlineUsers[index] = usernameify(user.slice(1));
+            onlineUsers[index] = toID(user.slice(1));
         });
         // find all users in the database
         db.all('SELECT * FROM pc', [], (err, rows) => {
@@ -106,7 +107,7 @@ export function politicalCompass(message: Message, username: string) {
                 for (const row of rows) {
                     // check if the user is online
                     console.log(`row ${(row as any).name}`);
-                    if (!onlineUsers.includes(usernameify((row as any).name))) {
+                    if (!onlineUsers.includes(toID((row as any).name))) {
                         console.log('User not currently in server: ' + (row as any).name);
                         continue;
                     }
