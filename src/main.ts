@@ -12,7 +12,7 @@ import { saveChat } from './mods/saveChat.js';
 import { ttp, ttp2 } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
-import { MBaddPoints, MBanswerQuestion, MBleaderboard, MBrank } from './mods/mysterybox.js';
+import { MBaddPoints, MBanswerQuestion, MBleaderboard, MBrank, MBsetAnswer } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
 import { isCmd } from './utils.js';
 
@@ -37,6 +37,7 @@ client.on('message', (message) => {
     if (isAuth(message) || config.whitelist.includes(username)) {
         MBleaderboard(message);
         MBaddPoints(message);
+        MBsetAnswer(message);
         addCustom(message);
         randopple(message);
         ttp(message);

@@ -13,7 +13,7 @@ dotenv.config();
 if (!fs.existsSync('./answer.txt')) {
     fs.writeFileSync('./answer.txt', '');
 }
-const answer = fs.readFileSync('./answer.txt').toString().toLowerCase().trim();
+let answer = fs.readFileSync('./answer.txt').toString().toLowerCase().trim();
 
 if (!fs.existsSync('./winners.txt')) {
     fs.writeFileSync('./winners.txt', '');
@@ -28,10 +28,30 @@ function addWinner(id: string) {
 
 
 export function MBsetAnswer(message: Message) {
-    if (!isAuth(message, 'petsanimals')) {
-        return;
-    } else if (isCmd(message, 'newquestion')) {
-        if (answer) return message.reply(`There is already a question being created. You can use ${config.prefix}endquestion to end it.`);
+    console.log('MBsetAnswer');
+    if (isCmd(message, 'newquestion')) {
+        console.log('MBsetAnswer isCmd');
+        if (!isAuth(message, 'petsanimals')) {
+            return message.reply('You do not have permission to use this command.');
+        }
+        console.log('MBsetAnswer isAuth');
+        if (answer) return message.reply(`There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
+        const text = message.content;
+        const newAnswer = text.split(' ').slice(1).join(' ');
+        if (!newAnswer) return message.reply('Please specify an answer.');
+        fs.writeFileSync('./answer.txt', newAnswer.toLowerCase().trim());
+        answer = newAnswer.toLowerCase().trim();
+        message.reply(`The answer has been set to ${newAnswer}.`);
+    } else if (isCmd(message, 'endquestion')) {
+        if (!isAuth(message, 'petsanimals')) {
+            return message.reply('You do not have permission to use this command.');
+        }
+        if (!answer) return message.reply('There is no ongoing question.');
+        fs.writeFileSync('./answer.txt', '');
+        answer = '';
+        fs.writeFileSync('./winners.txt', '');
+        winners.length = 0;
+        message.reply('The question has been ended.');
     }
 }
 
@@ -46,18 +66,20 @@ export function MBanswerQuestion(message: Message) {
             message.reply(`/clearlines ${message.author.id}, 1`);
             return;
         }
-        if (!answer) return message.reply('There is no question being created. Please create one first.');
+        if (!answer) return message.reply('There is no ongoing question.');
         if (winners.includes(message.author.id)) return message.reply('You already answered correctly. Please wait for the next question.');
         if (answer === attempt.toLowerCase().trim()) {
-            winners.push(message.author.id);
-            message.reply(`Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly.`);
+            addWinner(message.author.id);
+            const points = Math.max(1, 6 - winners.length);
+            addPointsToUser(message.author.id, points, () => {});
+            message.reply(`Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`);
             if (winners.length <= 3) {
                 const room = client.rooms.get(hostRoom);
                 if (!room) {
                     console.error('Room not found');
                     return;
                 }
-                room.send(`/adduhtml MB${winners.length}, <div class="broadcast-blue"><center><h3><username>${message.author.name}</username> has answered in ${toOrdinal(winners.length)} place!</h3></center></div>`);
+                room.send(`/adduhtml MB${winners.length}, <div class="broadcast-blue"><center>${message.author.name} has answered in ${toOrdinal(winners.length)} place!</center></div>`);
             }
             return;
         } else {
