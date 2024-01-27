@@ -1,6 +1,6 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
-import { formatTop3, inAllowedRooms, isCmd, isRoom, toOrdinal } from '../utils.js';
+import { inAllowedRooms, isCmd, isRoom, toOrdinal } from '../utils.js';
 import client, { config, isAuth } from '../bot.js';
 import fs from 'fs';
 
@@ -13,7 +13,8 @@ dotenv.config();
 if (!fs.existsSync('./answer.txt')) {
     fs.writeFileSync('./answer.txt', '');
 }
-let answer = fs.readFileSync('./answer.txt').toString().toLowerCase().trim();
+// remove spaces
+let answer = fs.readFileSync('./answer.txt').toString().toLowerCase().replace(/ /g, '').trim();
 
 if (!fs.existsSync('./winners.txt')) {
     fs.writeFileSync('./winners.txt', '');
@@ -27,17 +28,15 @@ function addWinner(id: string) {
 }
 
 
+const hostRoom = 'botdevelopment'; // TODO: Change this to the real host room
 export function MBsetAnswer(message: Message) {
-    console.log('MBsetAnswer');
     if (isCmd(message, 'newquestion')) {
-        console.log('MBsetAnswer isCmd');
         if (!isAuth(message, 'petsanimals')) {
             return message.reply('You do not have permission to use this command.');
         }
-        console.log('MBsetAnswer isAuth');
         if (answer) return message.reply(`There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
         const text = message.content;
-        const newAnswer = text.split(' ').slice(1).join(' ');
+        const newAnswer = text.split(' ').slice(1).join('');
         if (!newAnswer) return message.reply('Please specify an answer.');
         fs.writeFileSync('./answer.txt', newAnswer.toLowerCase().trim());
         answer = newAnswer.toLowerCase().trim();
@@ -52,21 +51,43 @@ export function MBsetAnswer(message: Message) {
         fs.writeFileSync('./winners.txt', '');
         winners.length = 0;
         message.reply('The question has been ended.');
+    } else if (isCmd(message, 'declare')) {
+        if (!isAuth(message, 'petsanimals')) {
+            return message.reply('You do not have permission to use this command.');
+        }
+        const room = client.rooms.get(hostRoom);
+        if (!room) {
+            console.error('Room not found');
+            return;
+        }
+        room.send(`/declare A new question has been posted in the Mystery Box!`);
+        room.send(`!rfaq mysterybox`);
     }
 }
 
+// They can only answer 3 times per hour, so we need to keep track of that
+let cooldowns: {[k: string]: Date}[] = [];
+const cooldownTime = 60 * 60 * 1000; // 1 hour
+// const cooldownTime = 30 * 1000; // 30 seconds
+
 export function MBanswerQuestion(message: Message) {
-    const hostRoom = 'botdevelopment'; // TODO: Change this to the real host room
     // const hostRoom = 'groupchat-itszxc-44323579';
     const text = message.content;
     if (isCmd(message, 'answer')) {
-        const attempt = text.split(' ').slice(1).join(' ');
+        const attempt = text.split(' ').slice(1).join('');
         if (isRoom(message.target)) {
             message.reply('Please answer the question in a private message!');
             message.reply(`/clearlines ${message.author.id}, 1`);
             return;
         }
         if (!answer) return message.reply('There is no ongoing question.');
+        cooldowns = cooldowns.filter(x => x[message.author.id] && x[message.author.id].getTime() + cooldownTime > Date.now());
+        // if the user appears 3 times in the cooldowns array, they can't answer anymore
+        if (cooldowns.filter(x => x[message.author.id]).length >= 3) {
+            message.reply('You can only answer 3 times per hour.');
+            return;
+        }
+
         if (winners.includes(message.author.id)) return message.reply('You already answered correctly. Please wait for the next question.');
         if (answer === attempt.toLowerCase().trim()) {
             addWinner(message.author.id);
@@ -84,6 +105,8 @@ export function MBanswerQuestion(message: Message) {
             return;
         } else {
             message.reply('Wrong answer, please try again.');
+            const now = new Date();
+            cooldowns.push({ [message.author.id]: now });
             return;
         }
     }
@@ -146,7 +169,7 @@ export function MBaddPoints(message: Message) {
         //         });
         //     }
         // });
-        addPointsToUser(user, points, () => message.reply(`Added ${points} points to ${name} for a total of ${points} points.`));
+        addPointsToUser(user, points, () => message.reply(`Added ${points} points to ${name}.`));
     }
 }
 
