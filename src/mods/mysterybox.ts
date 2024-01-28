@@ -28,6 +28,12 @@ function addWinner(id: string) {
 }
 
 
+if (!fs.existsSync('./difficulty.txt')) {
+    fs.writeFileSync('./difficulty.txt', '');
+}
+
+let difficulty : string = fs.readFileSync('./difficulty.txt').toString().toLowerCase().trim();
+
 const hostRoom = 'botdevelopment'; // TODO: Change this to the real host room
 export function MBsetAnswer(message: Message) {
     if (isCmd(message, 'newquestion')) {
@@ -36,10 +42,15 @@ export function MBsetAnswer(message: Message) {
         }
         if (answer) return message.reply(`There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
         const text = message.content;
-        const newAnswer = text.split(' ').slice(1).join('');
+        const [_difficulty, ...newAnswertmp] = text.split(' ').slice(1).join('');
+        const legalDifficulties = ['easy', 'medium', 'hard'];
+        if (!legalDifficulties.includes(_difficulty)) return message.reply('Please specify a valid difficulty (easy, medium, hard).');
+        const newAnswer = newAnswertmp.join('');
         if (!newAnswer) return message.reply('Please specify an answer.');
         fs.writeFileSync('./answer.txt', newAnswer.toLowerCase().trim());
         answer = newAnswer.toLowerCase().trim();
+        fs.writeFileSync('./difficulty.txt', _difficulty.toLowerCase().trim());
+        difficulty = _difficulty.toLowerCase().trim();
         message.reply(`The answer has been set to ${newAnswer}.`);
     } else if (isCmd(message, 'endquestion')) {
         if (!isAuth(message, 'petsanimals')) {
@@ -81,6 +92,7 @@ export function MBanswerQuestion(message: Message) {
             return;
         }
         if (!answer) return message.reply('There is no ongoing question.');
+        if (!difficulty) return message.reply('There is no ongoing question.');
         cooldowns = cooldowns.filter(x => x[message.author.id] && x[message.author.id].getTime() + cooldownTime > Date.now());
         // if the user appears 3 times in the cooldowns array, they can't answer anymore
         if (cooldowns.filter(x => x[message.author.id]).length >= 3) {
@@ -90,8 +102,8 @@ export function MBanswerQuestion(message: Message) {
 
         if (winners.includes(message.author.id)) return message.reply('You already answered correctly. Please wait for the next question.');
         if (answer === attempt.toLowerCase().trim()) {
+            const points = difficulty === 'easy' ? 2 : difficulty === 'medium' ? winners.length <= 3 ? 6 - winners.length : 3 : winners.length <= 5 ? 9 - winners.length : 4;
             addWinner(message.author.id);
-            const points = Math.max(1, 6 - winners.length);
             addPointsToUser(message.author.id, points, () => {});
             message.reply(`Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`);
             if (winners.length <= 3) {
