@@ -34,7 +34,7 @@ if (!fs.existsSync('./difficulty.txt')) {
 
 let difficulty : string = fs.readFileSync('./difficulty.txt').toString().toLowerCase().trim();
 
-const hostRoom = 'petsanimals'; // TODO: Change this to the real host room
+const hostRoom = 'petsanimals';
 export function MBsetAnswer(message: Message) {
     if (isCmd(message, 'newquestion')) {
         if (!isAuth(message, 'petsanimals')) {
@@ -42,9 +42,9 @@ export function MBsetAnswer(message: Message) {
         }
         if (answer) return message.reply(`There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
         const text = message.content;
-        const [_difficulty, ...newAnswertmp] = text.split(' ').slice(1).join('');
+        const [_difficulty, ...newAnswertmp] = text.split(' ').slice(1).join(' ').split(',');
         const legalDifficulties = ['easy', 'medium', 'hard'];
-        if (!legalDifficulties.includes(_difficulty)) return message.reply('Please specify a valid difficulty (easy, medium, hard).');
+        if (!legalDifficulties.includes(_difficulty.toLowerCase().trim())) return message.reply('Please specify a valid difficulty (easy, medium, hard).');
         const newAnswer = newAnswertmp.join('');
         if (!newAnswer) return message.reply('Please specify an answer.');
         fs.writeFileSync('./answer.txt', newAnswer.toLowerCase().trim());
@@ -68,10 +68,9 @@ export function MBsetAnswer(message: Message) {
         }
         const room = client.rooms.get(hostRoom);
         if (!room) {
-            console.error('Room not found');
             return;
         }
-        room.send(`/declare A new question has been posted in the Mystery Box!`);
+        room.send(`/declare A new ${difficulty} question has been posted in the Mystery Box!`);
         room.send(`!rfaq mysterybox`);
     }
 }

@@ -7,3 +7,4 @@ config.json
 dist/
 answer.txt
 winners.txt
+difficulty.txt
