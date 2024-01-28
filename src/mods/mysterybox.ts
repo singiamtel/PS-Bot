@@ -34,7 +34,7 @@ if (!fs.existsSync('./difficulty.txt')) {
 
 let difficulty : string = fs.readFileSync('./difficulty.txt').toString().toLowerCase().trim();
 
-const hostRoom = 'botdevelopment'; // TODO: Change this to the real host room
+const hostRoom = 'petsanimals'; // TODO: Change this to the real host room
 export function MBsetAnswer(message: Message) {
     if (isCmd(message, 'newquestion')) {
         if (!isAuth(message, 'petsanimals')) {
