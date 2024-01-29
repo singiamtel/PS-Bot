@@ -70,6 +70,7 @@ export function MBsetAnswer(message: Message) {
         if (!room) {
             return;
         }
+        if (!answer || !difficulty) return message.reply('There is no ongoing question.');
         room.send(`/declare A new ${difficulty} question has been posted in the Mystery Box!`);
         room.send(`!rfaq mysterybox`);
     }
