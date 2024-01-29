@@ -27,7 +27,6 @@ function addWinner(id: string) {
     fs.writeFileSync('./winners.txt', winners.join('\n'));
 }
 
-
 if (!fs.existsSync('./difficulty.txt')) {
     fs.writeFileSync('./difficulty.txt', '');
 }
@@ -185,6 +184,21 @@ export function MBaddPoints(message: Message) {
     }
 }
 
+const leaderboardCache: {table: string, time: number} = { table: '', time: 0 };
+export function leaderboard(cb: (leaderboard: string) => void, limit = 10) {
+    if (leaderboardCache.time + 5 * 1000 > Date.now()) { // 5 seconds
+        console.log('Cached leaderboard');
+        return cb(leaderboardCache.table);
+    }
+    db.all('SELECT * FROM mysterybox ORDER BY points DESC LIMIT ' + limit, (err, rows:any) => {
+        if (err) return console.error(err);
+        const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row:any, idx: number) => `<tr><td style="border:1px solid; padding:3px">${idx === 0 ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
+        leaderboardCache.table = htmlTable;
+        leaderboardCache.time = Date.now();
+        cb(htmlTable);
+    });
+}
+
 
 export function MBleaderboard(message: Message) {
     if (!isAuth(message)) {
@@ -192,9 +206,7 @@ export function MBleaderboard(message: Message) {
         return;
     }
     if (isCmd(message, ['leaderboard', 'lb'])) {
-        db.all('SELECT * FROM mysterybox ORDER BY points DESC LIMIT 10', (err, rows:any) => {
-            if (err) return console.error(err);
-            const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row:any, idx: number) => `<tr><td style="border:1px solid; padding:3px">${idx === 0 ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
+        leaderboard(htmlTable => {
             message.reply(`!htmlbox ${htmlTable}`);
         });
     }
@@ -221,4 +233,8 @@ export function MBrank(message: Message) {
             }
         });
     }
+}
+
+export function MBgetAnswers() {
+    return winners;
 }

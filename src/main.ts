@@ -12,9 +12,12 @@ import { saveChat } from './mods/saveChat.js';
 import { ttp, ttp2 } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
-import { MBaddPoints, MBanswerQuestion, MBleaderboard, MBrank, MBsetAnswer } from './mods/mysterybox.js';
+import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBsetAnswer, leaderboard } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
 import { isCmd } from './utils.js';
+
+import express from 'express';
+import morgan from 'morgan';
 
 client.on('message', (message) => {
     if (message.isIntro || message.author?.name === client.status.username) return;
@@ -96,4 +99,29 @@ client.on('login', () => {
     loadCustomColors();
     client.send(`|/autojoin ${__config.rooms.join(',')}`);
     // check('zarel');
+});
+
+const app = express();
+
+app.use(morgan('combined'));
+
+app.get('/', (_req, res) => {
+    res.redirect('/mysterybox/leaderboard');
+});
+
+app.get('/mysterybox/leaderboard', async (_req, res) => {
+    const lb = await new Promise((resolve) => {
+        leaderboard(resolve, 1000);
+    });
+    res.send(lb);
+});
+
+app.get('/mysterybox/currentAnswers', (_req, res) => {
+    const answers = MBgetAnswers();
+    res.send(`<h1>Current Answers: ${answers.length}</h1>
+  ${answers.map((a) => `<p>${a}</p>`).join('\n')}
+  `);
+});
+
+app.listen(13337, () => {
 });
