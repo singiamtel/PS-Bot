@@ -58,6 +58,10 @@ export function MBsetAnswer(message: Message) {
         if (!answer) return message.reply('There is no ongoing question.');
         fs.writeFileSync('./answer.txt', '');
         answer = '';
+        // copy old winners.txt to a file with the date
+        const date = new Date();
+        const winnersCopy = fs.readFileSync('./winners.txt').toString();
+        fs.writeFileSync(`./winners-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}.txt`, winnersCopy);
         fs.writeFileSync('./winners.txt', '');
         winners.length = 0;
         message.reply('The question has been ended.');
