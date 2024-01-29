@@ -105,18 +105,18 @@ const app = express();
 
 app.use(morgan('combined'));
 
-app.get('/', (_req, res) => {
-    res.redirect('/mysterybox/leaderboard');
+app.get('/roomba', (_req, res) => {
+    res.redirect('/roomba/mysterybox/leaderboard');
 });
 
-app.get('/mysterybox/leaderboard', async (_req, res) => {
+app.get('/roomba/mysterybox/leaderboard', async (_req, res) => {
     const lb = await new Promise((resolve) => {
         leaderboard(resolve, 1000);
     });
     res.send(lb);
 });
 
-app.get('/mysterybox/currentAnswers', (_req, res) => {
+app.get('/roomba/mysterybox/currentAnswers', (_req, res) => {
     const answers = MBgetAnswers();
     res.send(`<h1>Current Answers: ${answers.length}</h1>
   ${answers.map((a) => `<p>${a}</p>`).join('\n')}
