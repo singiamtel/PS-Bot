@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { loadCustomColors } from './namecolour.js';
+import { determineColour, loadCustomColors } from './namecolour.js';
 import client, { config, isAuth } from './bot.js';
 
 // Mods
@@ -119,7 +119,7 @@ app.get('/roomba/mysterybox/leaderboard', async (_req, res) => {
 app.get('/roomba/mysterybox/currentAnswers', (_req, res) => {
     const answers = MBgetAnswers();
     res.send(`<h1>Current Answers: ${answers.length}</h1>
-  ${answers.map((a) => `<p>${a}</p>`).join('\n')}
+  ${answers.map((a) => `<p style="color:${determineColour(a)}>${a}</p>`).join('\n')}
   `);
 });
 
