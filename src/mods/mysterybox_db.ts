@@ -1,7 +1,7 @@
 // stored in answer.txt, loaded on startup
 // if file doesn't exist, it will be created
 import fs from 'fs';
-import { toID } from 'ps-client/tools';
+import { toID } from 'ps-client/tools.js';
 
 if (!fs.existsSync('./answer.txt')) {
     fs.writeFileSync('./answer.txt', '');
