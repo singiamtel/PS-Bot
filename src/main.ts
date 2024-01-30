@@ -8,13 +8,12 @@ import { apologyCounter, apologyShower } from './mods/apologies.js';
 import { politicalCompass } from './mods/political_compass.js';
 import { nameColour } from './mods/namecolour.js';
 import { addCustom, answerToCustoms } from './mods/customs.js';
-import { saveChat } from './mods/saveChat.js';
 import { ttp, ttp2 } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
 import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBsetAnswer, leaderboard } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
-import { isCmd } from './utils.js';
+import { isCmd, isRoom } from './utils.js';
 
 import express from 'express';
 import morgan from 'morgan';
@@ -24,10 +23,12 @@ client.on('message', (message) => {
     const username = toID(message.author?.name);
 
     if (!username) return; // System messages
-    console.log(`message from ${username}: ${message.content}`);
+    const target = isRoom(message.target) ? message.target.roomid : 'pm';
+    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    console.log(`[${date}] Message from ${username}@${target}: ${message.content}`);
 
     // Public for all
-    saveChat(message, username);
+    // saveChat(message, username);
     apologyCounter(message, username);
     MBrank(message);
 
