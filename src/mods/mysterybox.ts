@@ -2,79 +2,39 @@ import { Message } from 'ps-client';
 import db from '../db.js';
 import { inAllowedRooms, isCmd, isRoom, toOrdinal } from '../utils.js';
 import client, { config, isAuth } from '../bot.js';
-import fs from 'fs';
 
 import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
+import { addWinner, endQuestion, getQuestion, isQuestionOngoing, newQuestion, winners } from './mysterybox_db.js';
 dotenv.config();
 
-// stored in answer.txt, loaded on startup
-// if file doesn't exist, it will be created
-if (!fs.existsSync('./answer.txt')) {
-    fs.writeFileSync('./answer.txt', '');
-}
-// remove spaces
-let answer = fs.readFileSync('./answer.txt').toString().toLowerCase().replace(/ /g, '').trim();
 
-if (!fs.existsSync('./winners.txt')) {
-    fs.writeFileSync('./winners.txt', '');
-}
+const legalDifficulties = ['easy', 'medium', 'hard'];
+const hostRoom = config.hostRoom;
 
-const winners = fs.readFileSync('./winners.txt').toString().split('\n').map(toID).filter(Boolean);
-
-function addWinner(id: string) {
-    winners.push(id);
-    fs.writeFileSync('./winners.txt', winners.join('\n'));
-}
-
-if (!fs.existsSync('./difficulty.txt')) {
-    fs.writeFileSync('./difficulty.txt', '');
-}
-
-let difficulty : string = fs.readFileSync('./difficulty.txt').toString().toLowerCase().trim();
-
-const hostRoom = 'petsanimals';
 export function MBsetAnswer(message: Message) {
+    if (!isAuth(message, hostRoom)) return;
+    const question = getQuestion();
     if (isCmd(message, 'newquestion')) {
-        if (!isAuth(message, 'petsanimals')) {
-            return message.reply('You do not have permission to use this command.');
-        }
-        if (answer) return message.reply(`There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
+        if (isQuestionOngoing()) return message.reply(`There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
         const text = message.content;
         const [_difficulty, ...newAnswertmp] = text.split(' ').slice(1).join(' ').split(',');
-        const legalDifficulties = ['easy', 'medium', 'hard'];
         if (!legalDifficulties.includes(_difficulty.toLowerCase().trim())) return message.reply('Please specify a valid difficulty (easy, medium, hard).');
         const newAnswer = newAnswertmp.join('');
         if (!newAnswer) return message.reply('Please specify an answer.');
-        fs.writeFileSync('./answer.txt', newAnswer.toLowerCase().trim());
-        answer = newAnswer.toLowerCase().trim();
-        fs.writeFileSync('./difficulty.txt', _difficulty.toLowerCase().trim());
-        difficulty = _difficulty.toLowerCase().trim();
+        newQuestion(newAnswer, _difficulty);
         message.reply(`The answer has been set to ${newAnswer}.`);
     } else if (isCmd(message, 'endquestion')) {
-        if (!isAuth(message, 'petsanimals')) {
-            return message.reply('You do not have permission to use this command.');
-        }
-        if (!answer) return message.reply('There is no ongoing question.');
-        fs.writeFileSync('./answer.txt', '');
-        answer = '';
-        // copy old winners.txt to a file with the date
-        const date = new Date();
-        const winnersCopy = fs.readFileSync('./winners.txt').toString();
-        fs.writeFileSync(`./winners-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}.txt`, winnersCopy);
-        fs.writeFileSync('./winners.txt', '');
-        winners.length = 0;
+        if (!isQuestionOngoing()) return message.reply('There is no ongoing question.');
+        endQuestion();
         message.reply('The question has been ended.');
     } else if (isCmd(message, 'declare')) {
-        if (!isAuth(message, 'petsanimals')) {
-            return message.reply('You do not have permission to use this command.');
-        }
         const room = client.rooms.get(hostRoom);
         if (!room) {
             return;
         }
-        if (!answer || !difficulty) return message.reply('There is no ongoing question.');
-        room.send(`/declare A new ${difficulty} question has been posted in the Mystery Box!`);
+        if (isQuestionOngoing()) return message.reply('There is no ongoing question.');
+        room.send(`/declare A new ${question.difficulty} question has been posted in the Mystery Box!`);
         room.send(`!rfaq mysterybox`);
     }
 }
@@ -88,14 +48,15 @@ export function MBanswerQuestion(message: Message) {
     // const hostRoom = 'groupchat-itszxc-44323579';
     const text = message.content;
     if (isCmd(message, 'answer')) {
-        const attempt = text.split(' ').slice(1).join('');
+        const question = getQuestion();
+        const { answer, difficulty } = question;
+        const attempt = text.replace(/^\/botmsg /i, '').split(' ').slice(1).join('');
         if (isRoom(message.target)) {
             message.reply('Please answer the question in a private message!');
             message.reply(`/clearlines ${message.author.id}, 1`);
             return;
         }
-        if (!answer) return message.reply('There is no ongoing question.');
-        if (!difficulty) return message.reply('There is no ongoing question.');
+        if (!isQuestionOngoing()) return message.reply('There is no ongoing question.');
         cooldowns = cooldowns.filter(x => x[message.author.id] && x[message.author.id].getTime() + cooldownTime > Date.now());
         // if the user appears 3 times in the cooldowns array, they can't answer anymore
         if (cooldowns.filter(x => x[message.author.id]).length >= 3) {
@@ -217,7 +178,7 @@ export function MBleaderboard(message: Message) {
 }
 
 export function MBrank(message: Message) {
-    if (isRoom(message.target) && !inAllowedRooms(message, ['petsanimals'])) {
+    if (isRoom(message.target) && !inAllowedRooms(message, [hostRoom])) {
         return;
     }
     if (isCmd(message, 'rank')) {
@@ -228,7 +189,6 @@ export function MBrank(message: Message) {
             if (err) return console.error(err);
             if (!rows || rows.length === 0) return message.reply('This user doesn\'t have any points yet.');
             const points = rows[0].points;
-            // return message.reply(`${displayname} has ${points} points.`);
             if (!isRoom(message.target) || isAuth(message)) {
                 return message.reply(`${displayname} has ${points} points.`);
             } else {

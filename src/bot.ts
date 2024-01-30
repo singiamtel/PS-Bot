@@ -1,5 +1,5 @@
-// const dotenv = require('dotenv');
 import dotenv from 'dotenv';
+import fs from 'fs';
 dotenv.config();
 
 import { Client, Message } from 'ps-client';
@@ -17,9 +17,23 @@ client.connect();
 
 export default client;
 
+let __config = {
+    rooms: [],
+    hostRoom: undefined,
+};
+try {
+    const data = fs.readFileSync('config.json', 'utf8');
+    __config = JSON.parse(data);
+} catch (err) {
+    console.log('No config.json file found. Creating one...');
+    fs.writeFileSync('config.json', JSON.stringify(__config, null, 2), 'utf8');
+}
+
 export const config = {
-    prefix: process.env.prefix || '#',
+    prefix: process.env.prefix ?? '#',
     whitelist: process.env.whitelist?.split(',').map((x) => x.trim()) || [],
+    rooms: __config.rooms,
+    hostRoom: __config.hostRoom ?? 'botdevelopment',
 };
 
 export const rankOrder = {
@@ -35,10 +49,12 @@ export const rankOrder = {
 
 export function isAuth(message: Message, room?: string) {
     if (room) {
-        const authObject = client.getRoom(room).auth;
+        const authObject = client.getRoom(room)?.auth;
         if (authObject) {
             const authList = Object.entries(client.getRoom(room).auth).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] > 4).map(([_rank, userArray]) => userArray).flat();
             return authList.includes(toID(message.author?.name));
+        } else {
+            return false;
         }
     }
 

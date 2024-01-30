@@ -1,4 +1,3 @@
-import fs from 'fs';
 
 import { determineColour, loadCustomColors } from './namecolour.js';
 import client, { config, isAuth } from './bot.js';
@@ -69,12 +68,6 @@ client.on('message', (message) => {
     }
 });
 
-// async function check(username) {
-//   console.log("Checking...");
-//   const userd = await Bot.getUserDetails(username);
-//   console.log(userd);
-// }
-
 // 2 minutes
 const timer = setTimeout(
     () => {
@@ -83,23 +76,12 @@ const timer = setTimeout(
     1000 * 60 * 2,
 );
 
-let __config = {
-    rooms: [],
-};
-try {
-    const data = fs.readFileSync('config.json', 'utf8');
-    __config = JSON.parse(data);
-} catch (err) {
-    console.log('No config.json file found. Creating one...');
-    fs.writeFileSync('config.json', JSON.stringify(__config, null, 2), 'utf8');
-}
 
 client.on('login', () => {
     console.log('Connected to chat');
     clearTimeout(timer);
     loadCustomColors();
-    client.send(`|/autojoin ${__config.rooms.join(',')}`);
-    // check('zarel');
+    client.send(`|/autojoin ${config.rooms.join(',')}`);
 });
 
 const app = express();

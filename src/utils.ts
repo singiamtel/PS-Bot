@@ -46,7 +46,7 @@ export function formatTop3(users: string[]) {
 }
 
 export function isCmd(message: Message, cmd: string | string[]): boolean {
-    // a cmd is a message that starts with the prefix and the cmd, followed by a space or the end of the message
+    // a cmd is a message that starts with the prefix and the cmd, followed by a space or the end of the message. or either but with /botmsg before the prefix
     if (Array.isArray(cmd)) return cmd.some(c => isCmd(message, c));
-    return message.content.startsWith(config.prefix + cmd + ' ') || message.content === config.prefix + cmd;
+    return message.content.startsWith(config.prefix + cmd + ' ') || message.content === config.prefix + cmd || message.content.startsWith('/botmsg ' + config.prefix + cmd + ' ') || message.content === '/botmsg ' + config.prefix + cmd;
 }
