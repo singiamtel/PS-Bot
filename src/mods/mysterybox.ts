@@ -196,7 +196,14 @@ export function MBrank(message: Message) {
         if (user === 'unknown') return message.reply('Please specify a user.');
         db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
             if (err) return console.error(err);
-            if (!rows || rows.length === 0) return message.reply('This user doesn\'t have any points yet.');
+            if (!rows || rows.length === 0) {
+                if (!isRoom(message.target) || isAuth(message)) {
+                    return message.reply(`This user has no points yet.`);
+                } else {
+                    // Pm the user
+                    return message.author.send(`This user has no points yet.`);
+                }
+            }
             const points = rows[0].points;
             if (!isRoom(message.target) || isAuth(message)) {
                 return message.reply(`${displayname} has ${points} points.`);
