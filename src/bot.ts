@@ -48,6 +48,7 @@ export const rankOrder = {
 };
 
 export function isAuth(message: Message, room?: string) {
+    if (config.whitelist.includes(toID(message.author?.name))) { return true; }
     if (room) {
         const authObject = client.getRoom(room)?.auth;
         if (authObject) {
@@ -58,7 +59,7 @@ export function isAuth(message: Message, room?: string) {
         }
     }
 
-    return (message.msgRank !== ' ' && message.msgRank !== '+') || config.whitelist.includes(toID(message.author?.name));
+    return (message.msgRank !== ' ' && message.msgRank !== '+');
 }
 
 console.info('Loaded config: ', config);
