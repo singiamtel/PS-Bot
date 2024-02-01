@@ -42,6 +42,16 @@ export function MBsetAnswer(message: Message) {
 // They can only answer 3 times per hour, so we need to keep track of that
 let cooldowns: {[k: string]: Date}[] = [];
 const cooldownTime = 60 * 60 * 1000; // 1 hour
+function updateCooldowns() {
+    cooldowns = cooldowns.filter(x => {
+        const now = new Date();
+        const keys = Object.keys(x);
+        const key = keys[0];
+        const date = x[key];
+        return now.getTime() - date.getTime() < cooldownTime;
+    });
+}
+setInterval(updateCooldowns, 1000 * 60); // 1 minute
 // const cooldownTime = 30 * 1000; // 30 seconds
 
 export function MBanswerQuestion(message: Message) {
@@ -57,7 +67,6 @@ export function MBanswerQuestion(message: Message) {
             return;
         }
         if (!isQuestionOngoing()) return message.reply('There is no ongoing question.');
-        cooldowns = cooldowns.filter(x => x[message.author.id] && x[message.author.id].getTime() + cooldownTime > Date.now());
         // if the user appears 3 times in the cooldowns array, they can't answer anymore
         if (cooldowns.filter(x => x[message.author.id]).length >= 3) {
             message.reply('You can only answer 3 times per hour.');
