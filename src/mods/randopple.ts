@@ -1,7 +1,8 @@
 import { Message } from 'ps-client';
 import { isCmd } from '../utils.js';
+import { config } from '../bot.js';
 
-const TTPurl = 'https://home.showcord.com/opples/';
+const TTPurl = config.imageCDN + '/opples/';
 const nOpples = 3;
 export function randopple(message:Message) {
     if (isCmd(message, 'randopple')) {

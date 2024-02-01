@@ -20,6 +20,7 @@ export default client;
 let __config = {
     rooms: [],
     hostRoom: undefined,
+    imageCDN: undefined,
 };
 try {
     const data = fs.readFileSync('config.json', 'utf8');
@@ -34,6 +35,7 @@ export const config = {
     whitelist: process.env.whitelist?.split(',').map((x) => x.trim()) || [],
     rooms: __config.rooms,
     hostRoom: __config.hostRoom ?? 'botdevelopment',
+    imageCDN: __config.imageCDN ?? 'https://cdn.crob.at/',
 };
 
 export const rankOrder = {

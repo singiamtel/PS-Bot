@@ -1,7 +1,8 @@
 import { Message } from 'ps-client';
 import { isCmd } from '../utils.js';
+import { config } from '../bot.js';
 
-const TTPurl = process.env.TTPurl || 'https://home.showcord.com/TTP/';
+const TTPurl = config.imageCDN + '/TTP/';
 
 export function ttp(message: Message) {
     if (isCmd(message, 'ttp')) {
@@ -15,7 +16,7 @@ export function ttp(message: Message) {
     }
 }
 
-const TTP2url = process.env.TTP2url || 'https://home.showcord.com/TTP2/';
+const TTP2url = config.imageCDN + '/TTP2/';
 
 export function ttp2(message: Message) {
     if (isCmd(message, 'ttp2')) {
