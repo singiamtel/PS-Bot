@@ -1,7 +1,7 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
 import { inAllowedRooms, isCmd, isRoom, toOrdinal } from '../utils.js';
-import client, { config, isAuth, reply } from '../bot.js';
+import client, { config, isAuth, privateHTML, reply } from '../bot.js';
 
 import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
@@ -60,31 +60,38 @@ function isInCooldown(user: string) {
 setInterval(updateCooldowns, 1000 * 60); // 1 minute
 // const cooldownTime = 30 * 1000; // 30 seconds
 
+const botMsg = /^\/botmsg /i;
 export function MBanswerQuestion(message: Message) {
     // const hostRoom = 'groupchat-itszxc-44323579';
     const text = message.content;
     if (isCmd(message, 'answer')) {
+        logger.verbose('Answering question: ' + text);
         const question = getQuestion();
         const { answer, difficulty } = question;
-        const attempt = text.replace(/^\/botmsg /i, '').split(' ').slice(1).join('');
+        const answerInRoom = botMsg.test(text);
+        const attempt = text.replace(botMsg, '').split(' ').slice(1).join('');
         if (isRoom(message.target)) {
             reply(message, 'Please answer the question in a private message!');
             message.reply(`/clearlines ${message.author.id}, 1, don't answer in the room :c`);
             return;
         }
-        if (!isQuestionOngoing()) return reply(message, 'There is no ongoing question.');
-        // if the user appears 3 times in the cooldowns array, they can't answer anymore
-        if (isInCooldown(message.author.id)) {
-            reply(message, 'You can only answer 3 times per hour.');
-            return;
+        if (!isQuestionOngoing()) {
+            return answerInRoom ? privateHTML(message, 'There is no ongoing question.', hostRoom) : reply(message, 'There is no ongoing question.');
         }
-
-        if (winners.includes(message.author.id)) return reply(message, 'You already answered correctly. Please wait for the next question.');
+        if (isInCooldown(message.author.id)) {
+            return answerInRoom ? privateHTML(message, 'You can only answer 3 times per hour.', hostRoom) : reply(message, 'You can only answer 3 times per hour.');
+        }
+        if (winners.includes(message.author.id)) return answerInRoom ? privateHTML(message, 'You already answered correctly. Please wait for the next question.', hostRoom) : reply(message, 'You already answered correctly. Please wait for the next question.');
         if (answer === attempt.toLowerCase().trim()) {
             const points = difficulty === 'easy' ? 2 : difficulty === 'medium' ? winners.length <= 3 ? 6 - winners.length : 3 : winners.length <= 5 ? 9 - winners.length : 4;
             addWinner(message.author.id);
             addPointsToUser(message.author.id, points, () => {});
-            reply(message, `Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`);
+            const msgContent = `Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`;
+            if (answerInRoom) {
+                privateHTML(message, msgContent, hostRoom);
+            } else {
+                reply(message, msgContent);
+            }
             if (winners.length <= 3) {
                 const room = client.rooms.get(hostRoom);
                 if (!room) {
@@ -95,7 +102,13 @@ export function MBanswerQuestion(message: Message) {
             }
             return;
         } else {
-            reply(message, 'Wrong answer, please try again.');
+            console.log('text', text, 'answerInRoom', answerInRoom);
+            if (answerInRoom) {
+                refreshAnswerBox(message, message.author.id);
+                privateHTML(message, 'Wrong answer, please try again.', hostRoom);
+            } else {
+                reply(message, 'Wrong answer, please try again.');
+            }
             const now = new Date();
             cooldowns.push({ [message.author.id]: now });
             return;
@@ -103,6 +116,34 @@ export function MBanswerQuestion(message: Message) {
     }
 }
 
+const answerBox = `<center><div style="padding: 10px; border-radius:15px;background-color: #ffeac9 ; color: #85071c; width:500px; border: 1px solid #85071c">  <h1>Enter your guess!</h1> <form data-submitsend="/msgroom ${config.hostRoom},/botmsg ${config.name}, ${config.prefix}answer {answer}"><input style="width: 400px; margin: 0 auto" autocomplete="off" name="answer" placeholder="Your guess goes here" style="width:60%;"><button style="display:block;margin: 10px;padding: 2px" class="button">Submit</button></form></div></center>`;
+
+function refreshAnswerBox(message: Message, user: string | null) {
+    if (user) {
+        return message.reply(`/msgroom ${config.hostRoom},/sendprivateuhtml ${user},answerbox, ${answerBox}`);
+    }
+    message.reply(`/msgroom ${config.hostRoom},/adduhtml answerbox, ${answerBox}`);
+}
+
+export function MBshowAnswerBox(message: Message) {
+    if (isCmd(message, 'answerbox')) {
+        logger.verbose('Showing answer box: ' + message.content);
+        const isBotMsg = botMsg.test(message.content);
+        if (isBotMsg) {
+            return refreshAnswerBox(message, message.author.id);
+        }
+        if (!isRoom(message.target)) {
+            return reply(message, 'Please use this command in a room.');
+        }
+        if (!inAllowedRooms(message, [hostRoom])) {
+            return;
+        }
+        if (!isAuth(message)) {
+            return refreshAnswerBox(message, message.author.id);
+        }
+        refreshAnswerBox(message, null);
+    }
+}
 
 function addPointsToUser(user: string, points: number, cb: () => void) {
     db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {

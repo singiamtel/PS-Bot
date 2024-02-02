@@ -3,6 +3,7 @@ import * as winston from 'winston';
 const myFormat = winston.format.printf(({ level, message, timestamp }) => `${timestamp} [${level}]: ${message}`);
 
 export const logger = winston.createLogger({
+    level: 'verbose',
     format: winston.format.combine(
         winston.format.timestamp(),
         myFormat

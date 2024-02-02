@@ -5,6 +5,7 @@ dotenv.config();
 import { Client, Message } from 'ps-client';
 import { toID } from 'ps-client/tools.js';
 import { logger } from './logger.js';
+import { isRoom } from './utils.js';
 
 if (process.env.botusername === undefined || process.env.botpassword === undefined) {
     logger.error('No username or password found in .env file. Exiting...');
@@ -37,6 +38,7 @@ export const config = {
     rooms: __config.rooms,
     hostRoom: __config.hostRoom ?? 'botdevelopment',
     imageCDN: __config.imageCDN ?? 'https://cdn.crob.at/',
+    name: process.env.botusername,
 };
 
 export const rankOrder = {
@@ -72,6 +74,12 @@ export function reply(message: Message, content: string, { inPm = true } : { inP
         return message.author.send(content);
     }
     return message.reply(content);
+}
+
+export function privateHTML(message: Message, content: string, room: string) {
+    if (!isRoom) return message.author.send(content);
+    logger.verbose('Sending private HTML to ' + message.author.id + ': ' + content + ' in room ' + message.raw);
+    return message.reply(`/msgroom ${room},/sendprivatehtmlbox  ${message.author.id}, ${content}`);
 }
 
 logger.info('Loaded config: ' + JSON.stringify(config));
