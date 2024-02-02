@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const db = new sqlite3.Database(path.join(__dirname, 'db.sqlite'));
+const db = new sqlite3.Database(path.join(__dirname, '../db.sqlite'));
 
 db.serialize(() => {
     db.run('CREATE TABLE IF NOT EXISTS apologies (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, points INTEGER)');
