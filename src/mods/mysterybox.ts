@@ -34,7 +34,7 @@ export function MBsetAnswer(message: Message) {
         if (!room) {
             return;
         }
-        if (isQuestionOngoing()) return message.reply('There is no ongoing question.');
+        if (!isQuestionOngoing()) return message.reply('There is no ongoing question.');
         room.send(`/declare A new ${question.difficulty} question has been posted in the Mystery Box!`);
         room.send(`!rfaq mysterybox`);
     }
