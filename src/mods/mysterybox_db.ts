@@ -42,6 +42,7 @@ export function endQuestion() {
     winners.length = 0;
     answer = '';
     difficulty = '';
+    cooldowns.length = 0;
 }
 
 export function isQuestionOngoing(): boolean {
@@ -51,3 +52,27 @@ export function isQuestionOngoing(): boolean {
 export function getQuestion() {
     return { answer, difficulty };
 }
+
+// They can only answer 3 times per hour, so we need to keep track of that
+let cooldowns: {[k: string]: Date}[] = [];
+const cooldownTime = 60 * 60 * 1000; // 1 hour
+export function updateCooldowns() {
+    cooldowns = cooldowns.filter(x => {
+        const now = new Date();
+        const keys = Object.keys(x);
+        const key = keys[0];
+        const date = x[key];
+        return now.getTime() - date.getTime() < cooldownTime;
+    });
+}
+
+export function isInCooldown(user: string) {
+    return cooldowns.filter(x => x[user]).length >= 3;
+}
+
+export function addCooldown(user: string) {
+    const now = new Date();
+    cooldowns.push({ [user]: now });
+}
+
+setInterval(updateCooldowns, 1000 * 60); // 1 minute

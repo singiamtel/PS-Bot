@@ -10,7 +10,7 @@ import { addCustom, answerToCustoms } from './mods/customs.js';
 import { ttp, ttp2 } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
-import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBsetAnswer, leaderboard } from './mods/mysterybox.js';
+import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBsetAnswer, MBshowAnswerBox, leaderboard } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
 import { isCmd, isRoom } from './utils.js';
 
@@ -31,6 +31,7 @@ client.on('message', (message) => {
     saveChat(message, username);
     apologyCounter(message, username);
     MBrank(message);
+    MBshowAnswerBox(message);
 
     // Not voice
     if (message.msgRank !== ' ') {
@@ -64,7 +65,7 @@ client.on('message', (message) => {
             logger.error(err);
             message.reply((err as Error)?.message || 'Eval failed');
         }
-    } else if (message.content.startsWith('#ping')) {
+    } else if (isCmd(message, 'ping')) {
         message.reply('Pong!');
     }
 });

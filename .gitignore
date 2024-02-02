@@ -6,5 +6,5 @@ customs.json
 config.json
 dist/
 answer.txt
-winners.txt
+winners*.txt
 difficulty.txt
