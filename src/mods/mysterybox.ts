@@ -1,11 +1,12 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
 import { inAllowedRooms, isCmd, isRoom, toOrdinal } from '../utils.js';
-import client, { config, isAuth } from '../bot.js';
+import client, { config, isAuth, reply } from '../bot.js';
 
 import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
 import { addWinner, endQuestion, getQuestion, isQuestionOngoing, newQuestion, winners } from './mysterybox_db.js';
+import { logger } from '../logger.js';
 dotenv.config();
 
 
@@ -16,7 +17,7 @@ export function MBsetAnswer(message: Message) {
     if (!isAuth(message, hostRoom)) return;
     const question = getQuestion();
     if (isCmd(message, 'newquestion')) {
-        if (isQuestionOngoing()) return message.reply(`There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
+        if (isQuestionOngoing()) return reply(message, `There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
         const text = message.content;
         const [_difficulty, ...newAnswertmp] = text.split(' ').slice(1).join(' ').split(',');
         if (!legalDifficulties.includes(_difficulty.toLowerCase().trim())) return message.reply('Please specify a valid difficulty (easy, medium, hard).');
@@ -51,6 +52,11 @@ function updateCooldowns() {
         return now.getTime() - date.getTime() < cooldownTime;
     });
 }
+
+function isInCooldown(user: string) {
+    return cooldowns.filter(x => x[user]).length >= 3;
+}
+
 setInterval(updateCooldowns, 1000 * 60); // 1 minute
 // const cooldownTime = 30 * 1000; // 30 seconds
 
@@ -62,34 +68,34 @@ export function MBanswerQuestion(message: Message) {
         const { answer, difficulty } = question;
         const attempt = text.replace(/^\/botmsg /i, '').split(' ').slice(1).join('');
         if (isRoom(message.target)) {
-            message.reply('Please answer the question in a private message!');
-            message.reply(`/clearlines ${message.author.id}, 1`);
+            reply(message, 'Please answer the question in a private message!');
+            message.reply(`/clearlines ${message.author.id}, 1, don't answer in the room :c`);
             return;
         }
-        if (!isQuestionOngoing()) return message.reply('There is no ongoing question.');
+        if (!isQuestionOngoing()) return reply(message, 'There is no ongoing question.');
         // if the user appears 3 times in the cooldowns array, they can't answer anymore
-        if (cooldowns.filter(x => x[message.author.id]).length >= 3) {
-            message.reply('You can only answer 3 times per hour.');
+        if (isInCooldown(message.author.id)) {
+            reply(message, 'You can only answer 3 times per hour.');
             return;
         }
 
-        if (winners.includes(message.author.id)) return message.reply('You already answered correctly. Please wait for the next question.');
+        if (winners.includes(message.author.id)) return reply(message, 'You already answered correctly. Please wait for the next question.');
         if (answer === attempt.toLowerCase().trim()) {
             const points = difficulty === 'easy' ? 2 : difficulty === 'medium' ? winners.length <= 3 ? 6 - winners.length : 3 : winners.length <= 5 ? 9 - winners.length : 4;
             addWinner(message.author.id);
             addPointsToUser(message.author.id, points, () => {});
-            message.reply(`Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`);
+            reply(message, `Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`);
             if (winners.length <= 3) {
                 const room = client.rooms.get(hostRoom);
                 if (!room) {
-                    console.error('Room not found');
+                    logger.error('Bot is not present in the host room ' + hostRoom + ' ' + message.content);
                     return;
                 }
                 room.send(`/adduhtml MB${winners.length}, <div class="broadcast-blue"><center>${message.author.name} has answered in ${toOrdinal(winners.length)} place!</center></div>`);
             }
             return;
         } else {
-            message.reply('Wrong answer, please try again.');
+            reply(message, 'Wrong answer, please try again.');
             const now = new Date();
             cooldowns.push({ [message.author.id]: now });
             return;
@@ -100,12 +106,12 @@ export function MBanswerQuestion(message: Message) {
 
 function addPointsToUser(user: string, points: number, cb: () => void) {
     db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-        if (err) return console.error(err);
+        if (err) return logger.error(err);
         if (!rows || rows.length === 0) {
             const query = `INSERT INTO mysterybox(name, points) VALUES(? , ?)`;
             db.run(query, [user, points], err => {
                 if (err) {
-                    console.error(err);
+                    logger.error(err);
                     return;
                 }
                 cb();
@@ -113,7 +119,7 @@ function addPointsToUser(user: string, points: number, cb: () => void) {
         } else {
             db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + (rows[0] as any).points, user], err => {
                 if (err) {
-                    console.error(err);
+                    logger.error(err);
                     return;
                 }
                 cb();
@@ -132,28 +138,6 @@ export function MBaddPoints(message: Message) {
         if (!name || !points) return message.reply('Please specify a user and points.');
         const user = toID(name);
         if (user === 'unknown') return message.reply('Please specify a user.');
-        // db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-        //     if (err) {
-        //         console.error('here', err, rows, user);
-        //         return;
-        //     }
-        //     if (!rows || rows.length === 0) {
-        //         const query = `INSERT INTO mysterybox(name, points) VALUES(? , ?)`;
-        //         db.run(query, [user, points], err => {
-        //             if (err) {
-        //                 console.error('here2', query, err);
-        //                 return;
-        //             }
-        //             return message.reply(`Added ${points} points to ${name} for a total of ${points} points.`);
-        //         });
-        //     } else {
-        //         db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + (rows[0] as any).points, user], err => {
-        //             if (err) return console.error(err);
-        //             console.log(rows);
-        //             return message.reply(`Added ${points} points to ${name} for a total of ${Number((rows[0] as any).points) + Number(points)} points.`);
-        //         });
-        //     }
-        // });
         addPointsToUser(user, points, () => message.reply(`Added ${points} points to ${name}.`));
     }
 }
@@ -161,11 +145,10 @@ export function MBaddPoints(message: Message) {
 const leaderboardCache: {table: string, time: number} = { table: '', time: 0 };
 export function leaderboard(cb: (leaderboard: string) => void, limit = 10) {
     if (leaderboardCache.time + 5 * 1000 > Date.now()) { // 5 seconds
-        console.log('Cached leaderboard');
         return cb(leaderboardCache.table);
     }
     db.all('SELECT * FROM mysterybox ORDER BY points DESC LIMIT ' + limit, (err, rows:any) => {
-        if (err) return console.error(err);
+        if (err) return logger.error(err);
         const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row:any, idx: number) => `<tr><td style="border:1px solid; padding:3px">${idx === 0 ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
         leaderboardCache.table = htmlTable;
         leaderboardCache.time = Date.now();
@@ -176,7 +159,6 @@ export function leaderboard(cb: (leaderboard: string) => void, limit = 10) {
 
 export function MBleaderboard(message: Message) {
     if (!isAuth(message)) {
-        console.log('not auth');
         return;
     }
     if (isCmd(message, ['leaderboard', 'lb'])) {
@@ -195,7 +177,7 @@ export function MBrank(message: Message) {
         const user = toID(displayname);
         if (user === 'unknown') return message.reply('Please specify a user.');
         db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-            if (err) return console.error(err);
+            if (err) return logger.error(err);
             if (!rows || rows.length === 0) {
                 if (!isRoom(message.target) || isAuth(message)) {
                     return message.reply(`This user has no points yet.`);

@@ -45,7 +45,6 @@ export function endQuestion() {
 }
 
 export function isQuestionOngoing(): boolean {
-    console.log(answer);
     return !!answer;
 }
 

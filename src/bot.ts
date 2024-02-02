@@ -4,15 +4,16 @@ dotenv.config();
 
 import { Client, Message } from 'ps-client';
 import { toID } from 'ps-client/tools.js';
+import { logger } from './logger.js';
 
 if (process.env.botusername === undefined || process.env.botpassword === undefined) {
-    console.error('No username or password found in .env file. Exiting...');
+    logger.error('No username or password found in .env file. Exiting...');
     process.exit(1);
 }
 
 const client = new Client({ username: process.env.botusername, password: process.env.botpassword, debug: true, avatar: 'supernerd', rooms: [] });
 
-console.log('Connecting to PS!');
+logger.info('Connecting to PS...');
 client.connect();
 
 export default client;
@@ -26,7 +27,7 @@ try {
     const data = fs.readFileSync('config.json', 'utf8');
     __config = JSON.parse(data);
 } catch (err) {
-    console.log('No config.json file found. Creating one...');
+    logger.info('No config.json file found. Creating one...');
     fs.writeFileSync('config.json', JSON.stringify(__config, null, 2), 'utf8');
 }
 
@@ -64,4 +65,13 @@ export function isAuth(message: Message, room?: string) {
     return (message.msgRank !== ' ' && message.msgRank !== '+');
 }
 
-console.info('Loaded config: ', config);
+// take an optional settings object parameter with a default value of true
+// if no settings object is provided, default to sending the message in PM
+export function reply(message: Message, content: string, { inPm = true } : { inPm?: boolean } = {}) {
+    if (inPm) {
+        return message.author.send(content);
+    }
+    return message.reply(content);
+}
+
+logger.info('Loaded config: ' + JSON.stringify(config));

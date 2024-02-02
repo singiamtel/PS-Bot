@@ -50,3 +50,4 @@ export function isCmd(message: Message, cmd: string | string[]): boolean {
     if (Array.isArray(cmd)) return cmd.some(c => isCmd(message, c));
     return message.content.startsWith(config.prefix + cmd + ' ') || message.content === config.prefix + cmd || message.content.startsWith('/botmsg ' + config.prefix + cmd + ' ') || message.content === '/botmsg ' + config.prefix + cmd;
 }
+

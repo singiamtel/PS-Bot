@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toID } from 'ps-client/tools.js';
+import { logger } from './logger.js';
 
 // Author: Felucia
 function userColorHash(name) {
@@ -620,7 +621,7 @@ export async function loadCustomColors() {
         Object.assign(customColors, res.data);
         loadedCustomColors = true;
     } catch (e) {
-        console.error('Couldn\'t fetch custom colours:', e);
+        logger.error('Couldn\'t fetch custom colours: ' + e);
     }
 }
 

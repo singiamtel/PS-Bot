@@ -5,10 +5,11 @@ import db from '../db.js';
 import { URL } from 'node:url';
 import { toID } from 'ps-client/tools.js';
 import { isCmd } from '../utils.js';
+import { logger } from '../logger.js';
 
 export function politicalCompass(message: Message, username: string) {
     if (username === 'unknown') {
-        console.log('Unknown user: ' + message.author.name);
+        logger.warn('politicalCompass: Unknown user ' + message.author.name + ', content: ' + message.content);
         return;
     }
     if (isCmd(message, 'addpc')) {
@@ -24,7 +25,6 @@ export function politicalCompass(message: Message, username: string) {
         const curr_url = new URL(curr_url_tmp);
         if (!(curr_url.hostname === 'www.politicalcompass.org' || curr_url.hostname === 'politicalcompass.org')) {
             message.reply('That is not a valid political compass URL!');
-            console.log('Invalid political compass hostname: ' + curr_url);
             return;
         }
         const params = curr_url.searchParams;
@@ -32,20 +32,19 @@ export function politicalCompass(message: Message, username: string) {
         const soc = Number(params.get('soc'));
         if (!ec || !soc || isNaN(ec) || isNaN(soc) || ec < -10 || ec > 10 || soc < -10 || soc > 10) {
             message.reply('That is not a valid political compass URL!');
-            console.log('Invalid political compass URL ec/soc: ' + curr_url + ' ec: ' + ec + ' soc: ' + soc);
             return;
         }
         // find the user in the database
         db.get('SELECT * FROM pc WHERE name = ?', [user], (err, row) => {
             if (err) {
-                console.log(err);
+                logger.error(err);
                 return;
             }
             if (row === undefined) {
                 // add the user to the database
                 db.run('INSERT INTO pc (name, economic, social) VALUES (?, ?, ?)', [user, ec, soc], (err) => {
                     if (err) {
-                        console.log(err);
+                        logger.error(err);
                         return;
                     }
                     message.reply('Political compass has been added!');
@@ -54,7 +53,7 @@ export function politicalCompass(message: Message, username: string) {
                 // update the user's political compass
                 db.run('UPDATE pc SET economic = ?, social = ? WHERE name = ?', [ec, soc, user], (err) => {
                     if (err) {
-                        console.log(err);
+                        logger.error(err);
                         return;
                     }
                     message.reply('Political compass has been updated!');
@@ -67,7 +66,7 @@ export function politicalCompass(message: Message, username: string) {
         const username = toID(user);
         db.get('SELECT * FROM pc WHERE name = ?', [username], (err, row) => {
             if (err) {
-                console.log(err);
+                logger.error(err);
                 return;
             }
             if (!row) {
@@ -94,7 +93,7 @@ export function politicalCompass(message: Message, username: string) {
         // find all users in the database
         db.all('SELECT * FROM pc', [], (err, rows) => {
             if (err) {
-                console.log(err);
+                logger.error(err);
                 return;
             }
             if (rows === undefined) {
@@ -106,9 +105,7 @@ export function politicalCompass(message: Message, username: string) {
                 let any = false;
                 for (const row of rows) {
                     // check if the user is online
-                    console.log(`row ${(row as any).name}`);
                     if (!onlineUsers.includes(toID((row as any).name))) {
-                        console.log('User not currently in server: ' + (row as any).name);
                         continue;
                     }
                     any = true;

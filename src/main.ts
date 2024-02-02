@@ -16,6 +16,8 @@ import { isCmd, isRoom } from './utils.js';
 
 import express from 'express';
 import morgan from 'morgan';
+import { logger } from './logger.js';
+import { saveChat } from './mods/saveChat.js';
 
 client.on('message', (message) => {
     if (message.isIntro || message.author?.name === client.status.username) return;
@@ -23,11 +25,10 @@ client.on('message', (message) => {
 
     if (!username) return; // System messages
     const target = isRoom(message.target) ? message.target.roomid : 'pm';
-    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-    console.log(`[${date}] Message from ${username}@${target}: ${message.content}`);
+    logger.verbose(`Message from ${username}@${target}: ${message.content}`);
 
     // Public for all
-    // saveChat(message, username);
+    saveChat(message, username);
     apologyCounter(message, username);
     MBrank(message);
 
@@ -60,7 +61,7 @@ client.on('message', (message) => {
             const result = eval(code);
             message.reply(result);
         } catch (err) {
-            console.log(err);
+            logger.error(err);
             message.reply((err as Error)?.message || 'Eval failed');
         }
     } else if (message.content.startsWith('#ping')) {
@@ -78,7 +79,7 @@ const timer = setTimeout(
 
 
 client.on('login', () => {
-    console.log('Connected to chat');
+    logger.info('Connected to chat');
     clearTimeout(timer);
     loadCustomColors();
     client.send(`|/autojoin ${config.rooms.join(',')}`);

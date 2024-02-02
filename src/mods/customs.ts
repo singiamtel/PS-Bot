@@ -5,6 +5,7 @@ import Room from 'ps-client/classes/room.js';
 import { config } from '../bot.js';
 import { toID } from 'ps-client/tools.js';
 import { isCmd } from '../utils.js';
+import { logger } from '../logger.js';
 
 // Load and parse the customs.json file
 let customs : {[key: string]: string} = {};
@@ -12,7 +13,7 @@ try {
     const data = fs.readFileSync('customs.json', 'utf8');
     customs = JSON.parse(data);
 } catch (err) {
-    console.log('No customs.json file found. Creating one...');
+    logger.info('No customs.json file found. Creating one...');
     fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
 }
 
@@ -55,7 +56,6 @@ export function addCustom(message : Message) {
         fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
         return message.reply('Custom deleted.');
     } else if (isCmd(message, ['showcustom', 'customs', 'listcustom'])) {
-        console.log('showing customs');
         return message.reply(`!code ${Object.keys(customs).join(`
 `)
         }`);

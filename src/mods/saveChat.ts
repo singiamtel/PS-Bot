@@ -8,11 +8,13 @@ import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 
 import { formatDate } from '../utils.js';
+import { logger } from '../logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const stream = fs.createWriteStream(path.join(__dirname, 'chat.txt'), { flags: 'a' });
+logger.info('Chat stream started in', path.join(__dirname, 'chat.txt'));
 
 export const saveChat = (message: Message, username: string) => {
     // YYYY-MM-DD HH:MM:SS
