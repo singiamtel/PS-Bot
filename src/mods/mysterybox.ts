@@ -5,7 +5,7 @@ import client, { config, isAuth, privateHTML, reply } from '../bot.js';
 
 import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
-import { addWinner, endQuestion, getQuestion, isQuestionOngoing, newQuestion, winners } from './mysterybox_db.js';
+import { addCooldown, addWinner, endQuestion, getQuestion, isInCooldown, isQuestionOngoing, newQuestion, winners } from './mysterybox_db.js';
 import { logger } from '../logger.js';
 dotenv.config();
 
@@ -39,25 +39,6 @@ export function MBsetAnswer(message: Message) {
         room.send(`!rfaq mysterybox`);
     }
 }
-
-// They can only answer 3 times per hour, so we need to keep track of that
-let cooldowns: {[k: string]: Date}[] = [];
-const cooldownTime = 60 * 60 * 1000; // 1 hour
-function updateCooldowns() {
-    cooldowns = cooldowns.filter(x => {
-        const now = new Date();
-        const keys = Object.keys(x);
-        const key = keys[0];
-        const date = x[key];
-        return now.getTime() - date.getTime() < cooldownTime;
-    });
-}
-
-function isInCooldown(user: string) {
-    return cooldowns.filter(x => x[user]).length >= 3;
-}
-
-setInterval(updateCooldowns, 1000 * 60); // 1 minute
 // const cooldownTime = 30 * 1000; // 30 seconds
 
 const botMsg = /^\/botmsg /i;
@@ -110,13 +91,14 @@ export function MBanswerQuestion(message: Message) {
                 reply(message, 'Wrong answer, please try again.');
             }
             const now = new Date();
-            cooldowns.push({ [message.author.id]: now });
+            // cooldowns.push({ [message.author.id]: now });
+            addCooldown(message.author.id);
             return;
         }
     }
 }
 
-const answerBox = `<center><div style="padding: 10px; border-radius:15px;background-color: #ffeac9 ; color: #85071c; width:500px; border: 1px solid #85071c">  <h1>Enter your guess!</h1> <form data-submitsend="/msgroom ${config.hostRoom},/botmsg ${config.name}, ${config.prefix}answer {answer}"><input style="width: 400px; margin: 0 auto" autocomplete="off" name="answer" placeholder="Your guess goes here" style="width:60%;"><button style="display:block;margin: 10px;padding: 2px" class="button">Submit</button></form></div></center>`;
+const answerBox = `<center><div style="padding: 10px; border-radius:15px;background-color: #ffeac9 ; color: #85071c; width:500px; border: 1px solid #85071c">  <h1>Enter your guess!</h1> <form data-submitsend="/msgroom ${config.hostRoom},/botmsg ${config.name}, ${config.prefix}answer {answer}"><input autofocus style="width: 400px; margin: 0 auto" autocomplete="off" name="answer" placeholder="Your guess goes here" style="width:60%;"><button style="display:block;margin: 10px;padding: 2px" class="button">Submit</button></form></div></center>`;
 
 function refreshAnswerBox(message: Message, user: string | null) {
     if (user) {
