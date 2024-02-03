@@ -206,6 +206,7 @@ export function MBrank(message: Message) {
         return;
     }
     if (isCmd(message, 'rank')) {
+        const isBotMsg = botMsg.test(message.content);
         const displayname = message.content.split(' ').slice(1).join(' ') || message.author.name;
         const user = toID(displayname);
         if (user === 'unknown') return message.reply('Please specify a user.');
@@ -213,14 +214,13 @@ export function MBrank(message: Message) {
             if (err) return logger.error(err);
             if (!rows || rows.length === 0) {
                 if (!isRoom(message.target) || isAuth(message)) {
-                    return message.reply(`This user has no points yet.`);
+                    return isBotMsg ? privateHTML(message, `${displayname} has no points yet.`, hostRoom) : message.reply(`${displayname} has no points yet.`);
                 } else {
                     // Pm the user
                     return message.author.send(`This user has no points yet.`);
                 }
             }
             const points = rows[0].points;
-            const isBotMsg = botMsg.test(message.content);
             if (isBotMsg) {
                 return privateHTML(message, `${displayname} has ${points} points.`, hostRoom);
             }
