@@ -32,6 +32,7 @@ client.on('message', (message) => {
     apologyCounter(message, username);
     MBrank(message);
     MBshowAnswerBox(message);
+    MBleaderboard(message);
 
     // Not voice
     if (message.msgRank !== ' ') {
@@ -40,7 +41,6 @@ client.on('message', (message) => {
     // Auth-only
     MBanswerQuestion(message);
     if (isAuth(message) || config.whitelist.includes(username)) {
-        MBleaderboard(message);
         MBaddPoints(message);
         MBsetAnswer(message);
         addCustom(message);
