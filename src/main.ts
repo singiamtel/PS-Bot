@@ -96,7 +96,7 @@ app.get('/roomba', (_req, res) => {
 
 app.get('/roomba/mysterybox/leaderboard', async (_req, res) => {
     const lb = await new Promise((resolve) => {
-        leaderboard(resolve, 1000);
+        leaderboard(resolve, { limit: 1000 });
     });
     res.send(lb);
 });
