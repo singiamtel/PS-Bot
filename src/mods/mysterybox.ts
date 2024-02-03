@@ -220,6 +220,10 @@ export function MBrank(message: Message) {
                 }
             }
             const points = rows[0].points;
+            const isBotMsg = botMsg.test(message.content);
+            if (isBotMsg) {
+                return privateHTML(message, `${displayname} has ${points} points.`, hostRoom);
+            }
             if (!isRoom(message.target) || isAuth(message)) {
                 return message.reply(`${displayname} has ${points} points.`);
             } else {
