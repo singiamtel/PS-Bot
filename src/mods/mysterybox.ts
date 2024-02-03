@@ -207,7 +207,7 @@ export function MBrank(message: Message) {
     }
     if (isCmd(message, 'rank')) {
         const isBotMsg = botMsg.test(message.content);
-        const displayname = message.content.split(' ').slice(1).join(' ') || message.author.name;
+        const displayname = message.content.replace(botMsg, '').split(' ').slice(1).join(' ') || message.author.name;
         const user = toID(displayname);
         if (user === 'unknown') return message.reply('Please specify a user.');
         db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
