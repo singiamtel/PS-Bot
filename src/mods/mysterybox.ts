@@ -166,12 +166,13 @@ export function MBaddPoints(message: Message) {
 }
 
 const leaderboardCache: {table: string, time: number} = { table: '', time: 0 };
-export function leaderboard(cb: (leaderboard: string) => void, limit = 10) {
+export function leaderboard(cb: (leaderboard: string) => void, { limit = 10, html = true } = {}) {
     if (leaderboardCache.time + 5 * 1000 > Date.now()) { // 5 seconds
         return cb(leaderboardCache.table);
     }
     db.all('SELECT * FROM mysterybox ORDER BY points DESC LIMIT ' + limit, (err, rows:any) => {
         if (err) return logger.error(err);
+        if (!html) { return cb(rows.map((row:any) => `${row.points === rows[0].points ? '👑 ' : ''}${row.name}: ${row.points}`).join('\n')); }
         const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row:any) => `<tr><td style="border:1px solid; padding:3px">${row.points === rows[0].points ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
         leaderboardCache.table = htmlTable;
         leaderboardCache.time = Date.now();
@@ -181,13 +182,22 @@ export function leaderboard(cb: (leaderboard: string) => void, limit = 10) {
 
 
 export function MBleaderboard(message: Message) {
-    if (!isAuth(message)) {
-        return;
-    }
     if (isCmd(message, ['leaderboard', 'lb'])) {
-        leaderboard(htmlTable => {
-            message.reply(`!htmlbox ${htmlTable}`);
-        });
+        const isBotMsg = botMsg.test(message.content);
+        if (isBotMsg) {
+            leaderboard(htmlTable => {
+                privateHTML(message, htmlTable, hostRoom);
+            });
+            return;
+        }
+        if (isRoom(message.target) && !inAllowedRooms(message, [hostRoom])) {
+            return;
+        }
+        if (!isRoom(message.target) || isAuth(message)) {
+            return leaderboard(table => {
+                message.reply(`!code ${table}`);
+            }, { html: false });
+        }
     }
 }
 
