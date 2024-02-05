@@ -58,7 +58,8 @@ export function isAuth(message: Message, room?: string) {
         const authObject = client.getRoom(room)?.auth;
         if (authObject) {
             const authList = Object.entries(client.getRoom(room).auth).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] > 4).map(([_rank, userArray]) => userArray).flat();
-            return authList.includes(toID(message.author?.name));
+            console.log(authList);
+            return authList.includes(toID(message.author?.id));
         } else {
             return false;
         }
