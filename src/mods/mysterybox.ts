@@ -13,6 +13,12 @@ dotenv.config();
 const legalDifficulties = ['easy', 'medium', 'hard'];
 const hostRoom = config.hostRoom;
 
+export function MBtestAuth(message: Message) {
+    if (isCmd(message, 'testauth')) {
+        return isAuth(message, hostRoom) ? reply(message, `You are auth in ${hostRoom}.`) : reply(message, `You are not auth in ${hostRoom}.`);
+    }
+}
+
 export function MBsetAnswer(message: Message) {
     if (!isAuth(message, hostRoom)) return;
     const question = getQuestion();

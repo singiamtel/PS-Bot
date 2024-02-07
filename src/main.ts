@@ -10,7 +10,7 @@ import { addCustom, answerToCustoms } from './mods/customs.js';
 import { ttp, ttp2 } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
-import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBsetAnswer, MBshowAnswerBox, leaderboard } from './mods/mysterybox.js';
+import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBsetAnswer, MBshowAnswerBox, MBtestAuth, leaderboard } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
 import { isCmd, isRoom } from './utils.js';
 
@@ -33,6 +33,7 @@ client.on('message', (message) => {
     MBrank(message);
     MBshowAnswerBox(message);
     MBleaderboard(message);
+    MBtestAuth(message);
 
     // Not voice
     if (message.msgRank !== ' ') {
