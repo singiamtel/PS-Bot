@@ -53,7 +53,7 @@ export const rankOrder = {
 };
 
 export function isAuth(message: Message, room?: string) {
-    // if (config.whitelist.includes(message.author.id)) { return true; }
+    if (config.whitelist.includes(message.author.id)) { return true; }
     if (room) {
         const authObject = client.getRoom(room)?.auth;
         if (authObject) {
