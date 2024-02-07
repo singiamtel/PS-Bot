@@ -30,7 +30,7 @@ export function answerToCustoms(message: Message) {
 
 // Function to add a custom message-response pair
 export function addCustom(message : Message) {
-    const isRoomOwner = message.msgRank !== '#';
+    const isRoomOwner = message.msgRank === '#';
     if (!isRoomOwner && !config.whitelist.includes(toID(message.author?.name))) {
         return;
     }
