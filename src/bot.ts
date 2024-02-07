@@ -60,6 +60,7 @@ export function isAuth(message: Message, room?: string) {
             const authList = Object.entries(client.getRoom(room).auth).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] > 4).map(([_rank, userArray]) => toID(userArray)).flat();
             return authList.includes(toID(message.author.id));
         } else {
+            logger.error('No auth object found for room ' + room);
             return false;
         }
     }
