@@ -53,11 +53,11 @@ export const rankOrder = {
 };
 
 export function isAuth(message: Message, room?: string) {
-    if (config.whitelist.includes(toID(message.author.id))) { return true; }
+    if (config.whitelist.includes(message.author.id)) { return true; }
     if (room) {
         const authObject = client.getRoom(room)?.auth;
         if (authObject) {
-            const authList = Object.entries(client.getRoom(room).auth).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] > 4).map(([_rank, userArray]) => userArray).flat();
+            const authList = Object.entries(client.getRoom(room).auth).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] > 4).map(([_rank, userArray]) => toID(userArray)).flat();
             return authList.includes(toID(message.author.id));
         } else {
             return false;
