@@ -196,7 +196,13 @@ export function MBleaderboard(message: Message) {
             });
             return;
         }
-        if (isRoom(message.target) && !inAllowedRooms(message, [hostRoom])) {
+        if (isRoom(message.target)) {
+            if (!inAllowedRooms(message, [hostRoom]) || !isAuth(message)) {
+                return;
+            }
+            leaderboard(htmlTable => {
+                message.reply(`/adduhtml MBleaderboard, ${htmlTable}`);
+            });
             return;
         }
         if (!isRoom(message.target) || isAuth(message)) {
