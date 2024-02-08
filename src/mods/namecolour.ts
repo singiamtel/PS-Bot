@@ -12,7 +12,9 @@ export function nameColour(message: Message, username: string | undefined) {
         const nameColour = determineColour(displayname);
         const colour = namer(nameColour).ntc[0];
         if (message.type === 'chat' && message.target instanceof Room && username && message.target.auth['*'].includes(toID(username))) {
-            return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${colour.name}`);
+            const delta = hexColorDelta(nameColour, '000000');
+            const fixedDelta = (delta * 100).toFixed(2);
+            return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${colour.name} (${fixedDelta}% match)`);
         } else { return message.reply(`I think that's ${colour.name} (#${colour.hex})`); }
     } else if (isCmd(message, 'comparecolours')) {
         const [name1, name2] = message.content.split(' ').slice(1).join(' ').split(',');
