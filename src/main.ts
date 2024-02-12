@@ -41,9 +41,11 @@ client.on('message', (message) => {
     }
     // Auth-only
     MBanswerQuestion(message);
-    if (isAuth(message) || config.whitelist.includes(username)) {
+    const isRoomAuth = isRoom(message.target) && isAuth(message, message.target.roomid);
+
+    MBsetAnswer(message);
+    if (isAuth(message) || isRoomAuth || config.whitelist.includes(username)) {
         MBaddPoints(message);
-        MBsetAnswer(message);
         addCustom(message);
         randopple(message);
         ttp(message);

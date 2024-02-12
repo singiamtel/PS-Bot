@@ -20,7 +20,9 @@ export function MBtestAuth(message: Message) {
 }
 
 export function MBsetAnswer(message: Message) {
-    if (!isAuth(message, hostRoom)) return;
+    if (!isAuth(message, hostRoom)) {
+        return;
+    }
     const question = getQuestion();
     if (isCmd(message, 'newquestion')) {
         if (isQuestionOngoing()) return reply(message, `There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
