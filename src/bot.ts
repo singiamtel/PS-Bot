@@ -1,11 +1,12 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
-dotenv.config();
 
 import { Client, Message } from 'ps-client';
 import { toID } from 'ps-client/tools.js';
 import { logger } from './logger.js';
 import { isRoom } from './utils.js';
+import path from 'path';
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 if (process.env.botusername === undefined || process.env.botpassword === undefined) {
     logger.error('No username or password found in .env file. Exiting...');

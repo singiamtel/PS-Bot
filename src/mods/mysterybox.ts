@@ -7,7 +7,8 @@ import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
 import { addCooldown, addWinner, endQuestion, getQuestion, isInCooldown, isQuestionOngoing, newQuestion, winners } from './mysterybox_db.js';
 import { logger } from '../logger.js';
-dotenv.config();
+import path from 'path';
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 
 const legalDifficulties = ['easy', 'medium', 'hard'];
