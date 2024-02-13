@@ -4,13 +4,9 @@ import fs from 'fs';
 import { Client, Message } from 'ps-client';
 import { toID } from 'ps-client/tools.js';
 import { logger } from './logger.js';
-import { isRoom } from './utils.js';
+import { isRoom, rootDir } from './utils.js';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.join(__dirname, '../.env') });
+dotenv.config({ path: path.join(rootDir, '../.env') });
 
 if (process.env.botusername === undefined || process.env.botpassword === undefined) {
     logger.error('No username or password found in .env file. Exiting...');
@@ -29,7 +25,7 @@ let __config = {
     hostRoom: undefined,
     imageCDN: undefined,
 };
-const configPath = path.join(__dirname, '../config.json');
+const configPath = path.join(rootDir, '../config.json');
 try {
     const data = fs.readFileSync(configPath, 'utf8');
     __config = JSON.parse(data);

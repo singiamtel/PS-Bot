@@ -4,16 +4,12 @@ import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import { config } from '../bot.js';
 import { toID } from 'ps-client/tools.js';
-import { isCmd } from '../utils.js';
+import { isCmd, rootDir } from '../utils.js';
 import { logger } from '../logger.js';
 
-import { fileURLToPath } from 'url';
 import path from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const customsPath = path.join(__dirname, '../customs.json');
+const customsPath = path.join(rootDir, '../customs.json');
 // Load and parse the customs file
 let customs : {[key: string]: string} = {};
 try {

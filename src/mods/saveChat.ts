@@ -3,17 +3,13 @@
 
 import fs from 'fs';
 import path from 'node:path';
-import { fileURLToPath } from 'url';
 import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 
-import { formatDate } from '../utils.js';
+import { formatDate, rootDir } from '../utils.js';
 import { logger } from '../logger.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const pathToChat = path.join(__dirname, '../chat.txt');
+const pathToChat = path.join(rootDir, '../chat.txt');
 const stream = fs.createWriteStream(pathToChat, { flags: 'a' });
 logger.info('Chat stream started in', pathToChat);
 

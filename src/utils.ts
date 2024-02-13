@@ -1,6 +1,13 @@
 import { Message, Room, User } from 'ps-client';
 import { config } from './bot.js';
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+export const rootDir = __dirname;
+
 export function padTo2Digits(num: number) {
     return num.toString().padStart(2, '0');
 }
@@ -50,3 +57,4 @@ export function isCmd(message: Message, cmd: string | string[]): boolean {
     if (Array.isArray(cmd)) return cmd.some(c => isCmd(message, c));
     return message.content.startsWith(config.prefix + cmd + ' ') || message.content === config.prefix + cmd || message.content.startsWith('/botmsg ' + config.prefix + cmd + ' ') || message.content === '/botmsg ' + config.prefix + cmd;
 }
+

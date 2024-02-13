@@ -1,10 +1,8 @@
 import path from 'path';
 import sqlite3 from 'sqlite3';
-import { fileURLToPath } from 'url';
+import { rootDir } from './bot';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const db = new sqlite3.Database(path.join(__dirname, '../db.sqlite'));
+const db = new sqlite3.Database(path.join(rootDir, '../db.sqlite'));
 
 db.serialize(() => {
     db.run('CREATE TABLE IF NOT EXISTS apologies (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, points INTEGER)');

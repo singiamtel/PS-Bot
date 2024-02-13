@@ -3,15 +3,13 @@
 import fs from 'fs';
 import { toID } from 'ps-client/tools.js';
 
-import { fileURLToPath } from 'url';
 import path from 'path';
+import { rootDir } from '../utils';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-const answerPath = path.join(__dirname, '../answer.txt');
-const difficultyPath = path.join(__dirname, '../difficulty.txt');
-const winnersPath = path.join(__dirname, '../winners.txt');
+const answerPath = path.join(rootDir, '../answer.txt');
+const difficultyPath = path.join(rootDir, '../difficulty.txt');
+const winnersPath = path.join(rootDir, '../winners.txt');
 if (!fs.existsSync(answerPath)) {
     fs.writeFileSync(answerPath, '');
 }
@@ -46,7 +44,7 @@ export function endQuestion() {
     fs.writeFileSync(answerPath, '');
     fs.writeFileSync(difficultyPath, '');
     const winnersCopy = fs.readFileSync(winnersPath).toString();
-    fs.writeFileSync(path.join(__dirname, `../winners-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}.txt`), winnersCopy);
+    fs.writeFileSync(path.join(rootDir, `../winners-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}.txt`), winnersCopy);
     fs.writeFileSync(winnersPath, '');
     winners.length = 0;
     answer = '';
