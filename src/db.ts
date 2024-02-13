@@ -1,6 +1,6 @@
 import path from 'path';
 import sqlite3 from 'sqlite3';
-import { rootDir } from './bot';
+import { rootDir } from './utils.js';
 
 const db = new sqlite3.Database(path.join(rootDir, '../db.sqlite'));
 

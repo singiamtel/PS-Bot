@@ -2,7 +2,7 @@ import { Webhook } from 'discord-webhook-node';
 import path from 'path';
 
 import dotenv from 'dotenv';
-import { rootDir } from './bot';
+import { rootDir } from './utils.js';
 
 dotenv.config({ path: path.join(rootDir, '../.env') });
 
