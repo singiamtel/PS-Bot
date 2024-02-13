@@ -20,7 +20,7 @@ import { logger } from './logger.js';
 import { saveChat } from './mods/saveChat.js';
 
 client.on('message', (message) => {
-    if (message.isIntro || message.author?.name === client.status.username || !message.author?.name === undefined) return;
+    if (message.isIntro || message.author?.name === client.status.username || message.author?.name === undefined) return;
     const username = toID(message.author?.name);
 
     if (!username) return; // System messages
