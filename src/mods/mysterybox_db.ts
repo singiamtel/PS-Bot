@@ -3,42 +3,51 @@
 import fs from 'fs';
 import { toID } from 'ps-client/tools.js';
 
-if (!fs.existsSync('./answer.txt')) {
-    fs.writeFileSync('./answer.txt', '');
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const answerPath = path.join(__dirname, 'answer.txt');
+const difficultyPath = path.join(__dirname, 'difficulty.txt');
+const winnersPath = path.join(__dirname, 'winners.txt');
+if (!fs.existsSync(answerPath)) {
+    fs.writeFileSync(answerPath, '');
 }
 
-if (!fs.existsSync('./winners.txt')) {
-    fs.writeFileSync('./winners.txt', '');
+if (!fs.existsSync(difficultyPath)) {
+    fs.writeFileSync(difficultyPath, '');
 }
 
-if (!fs.existsSync('./difficulty.txt')) {
-    fs.writeFileSync('./difficulty.txt', '');
+if (!fs.existsSync(winnersPath)) {
+    fs.writeFileSync(winnersPath, '');
 }
 
-export const winners = fs.readFileSync('./winners.txt').toString().split('\n').map(toID).filter(Boolean);
+export const winners = fs.readFileSync(winnersPath).toString().split('\n').map(toID).filter(Boolean);
 
-let answer = fs.readFileSync('./answer.txt').toString().toLowerCase().replace(/ /g, '').trim();
-let difficulty : string = fs.readFileSync('./difficulty.txt').toString().toLowerCase().trim();
+let answer = fs.readFileSync(answerPath).toString().toLowerCase().replace(/ /g, '').trim();
+let difficulty : string = fs.readFileSync(difficultyPath).toString().toLowerCase().trim();
 
 export function addWinner(id: string) {
     winners.push(id);
-    fs.writeFileSync('./winners.txt', winners.join('\n'));
+    fs.writeFileSync(winnersPath, winners.join('\n'));
 }
 
 export function newQuestion(newAnswer: string, newDifficulty: string) {
     answer = newAnswer.toLowerCase().replace(/ /g, '').trim();
     difficulty = newDifficulty.toLowerCase().trim();
-    fs.writeFileSync('./answer.txt', answer);
-    fs.writeFileSync('./difficulty.txt', difficulty);
+    fs.writeFileSync(answerPath, answer);
+    fs.writeFileSync(difficultyPath, difficulty);
 }
 
 export function endQuestion() {
     const date = new Date();
-    fs.writeFileSync('./answer.txt', '');
-    fs.writeFileSync('./difficulty.txt', '');
-    const winnersCopy = fs.readFileSync('./winners.txt').toString();
-    fs.writeFileSync(`./winners-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}.txt`, winnersCopy);
-    fs.writeFileSync('./winners.txt', '');
+    fs.writeFileSync(answerPath, '');
+    fs.writeFileSync(difficultyPath, '');
+    const winnersCopy = fs.readFileSync(winnersPath).toString();
+    fs.writeFileSync(path.join(__dirname, `winners-${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}.txt`), winnersCopy);
+    fs.writeFileSync(winnersPath, '');
     winners.length = 0;
     answer = '';
     difficulty = '';

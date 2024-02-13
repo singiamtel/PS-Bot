@@ -7,14 +7,21 @@ import { toID } from 'ps-client/tools.js';
 import { isCmd } from '../utils.js';
 import { logger } from '../logger.js';
 
-// Load and parse the customs.json file
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const customsPath = path.join(__dirname, 'customs.json');
+// Load and parse the customs file
 let customs : {[key: string]: string} = {};
 try {
-    const data = fs.readFileSync('customs.json', 'utf8');
+    const data = fs.readFileSync(customsPath, 'utf8');
     customs = JSON.parse(data);
 } catch (err) {
     logger.info('No customs.json file found. Creating one...');
-    fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
+    fs.writeFileSync(customsPath, JSON.stringify(customs, null, 2), 'utf8');
 }
 
 // Function to get response for a message
@@ -45,7 +52,7 @@ export function addCustom(message : Message) {
         }
         customs[key] = value;
         // Save the updated customs to the file
-        fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
+        fs.writeFileSync(customsPath, JSON.stringify(customs, null, 2), 'utf8');
         return message.reply('Custom added.');
     } else if (isCmd(message, ['deletecustom', 'removecustom', 'delcustom'])) {
         // Delete a custom
@@ -53,7 +60,7 @@ export function addCustom(message : Message) {
         if (!customs[args[0]]) return message.reply('That custom doesn\'t exist.');
         delete customs[args[0]];
         // Save the updated customs to the file
-        fs.writeFileSync('customs.json', JSON.stringify(customs, null, 2), 'utf8');
+        fs.writeFileSync(customsPath, JSON.stringify(customs, null, 2), 'utf8');
         return message.reply('Custom deleted.');
     } else if (isCmd(message, ['showcustom', 'customs', 'listcustom'])) {
         return message.reply(`!code ${Object.keys(customs).join(`

@@ -29,12 +29,13 @@ let __config = {
     hostRoom: undefined,
     imageCDN: undefined,
 };
+const configPath = path.join(__dirname, 'config.json');
 try {
-    const data = fs.readFileSync('config.json', 'utf8');
+    const data = fs.readFileSync(configPath, 'utf8');
     __config = JSON.parse(data);
 } catch (err) {
     logger.info('No config.json file found. Creating one...');
-    fs.writeFileSync('config.json', JSON.stringify(__config, null, 2), 'utf8');
+    fs.writeFileSync(configPath, JSON.stringify(__config, null, 2), 'utf8');
 }
 
 export const config = {
