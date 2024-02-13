@@ -4,7 +4,7 @@ import fs from 'fs';
 import { toID } from 'ps-client/tools.js';
 
 import path from 'path';
-import { rootDir } from '../utils';
+import { rootDir } from '../utils.js';
 
 
 const answerPath = path.join(rootDir, '../answer.txt');
