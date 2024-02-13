@@ -29,7 +29,7 @@ let __config = {
     hostRoom: undefined,
     imageCDN: undefined,
 };
-const configPath = path.join(__dirname, 'config.json');
+const configPath = path.join(__dirname, '../config.json');
 try {
     const data = fs.readFileSync(configPath, 'utf8');
     __config = JSON.parse(data);

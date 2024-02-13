@@ -13,8 +13,9 @@ import { logger } from '../logger.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const stream = fs.createWriteStream(path.join(__dirname, 'chat.txt'), { flags: 'a' });
-logger.info('Chat stream started in', path.join(__dirname, 'chat.txt'));
+const pathToChat = path.join(__dirname, '../chat.txt');
+const stream = fs.createWriteStream(pathToChat, { flags: 'a' });
+logger.info('Chat stream started in', pathToChat);
 
 export const saveChat = (message: Message, username: string) => {
     // YYYY-MM-DD HH:MM:SS
