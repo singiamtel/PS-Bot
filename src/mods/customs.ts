@@ -20,7 +20,7 @@ try {
     const data = fs.readFileSync(customsPath, 'utf8');
     customs = JSON.parse(data);
 } catch (err) {
-    logger.info('No customs.json file found. Creating one...');
+    logger.info('No customs.json file found. Creating one in', customsPath);
     fs.writeFileSync(customsPath, JSON.stringify(customs, null, 2), 'utf8');
 }
 
