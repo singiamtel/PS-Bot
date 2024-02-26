@@ -163,6 +163,9 @@ function addPointsToUser(user: string, points: number, cb: () => void) {
 
 export function MBaddPoints(message: Message) {
     const text = message.content;
+    if (!isAuth(message, hostRoom)) {
+        return;
+    }
     if (isCmd(message, 'addp')) {
         const args = text.split(' ').slice(1);
         const [name, _points] = args.join(' ').split(',');
