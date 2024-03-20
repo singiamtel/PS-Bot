@@ -19,7 +19,7 @@ export function nameColour(message: Message, username: string | undefined) {
             const fixedDelta = (delta * 100).toFixed(2);
             return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${colour.name} (${fixedDelta}% match)`);
         } else { return message.reply(`I think that's ${colour.name} (#${colour.hex})`); }
-    } else if (isCmd(message, ['comparecolours', 'comparecolors'])) {
+    } else if (isCmd(message, ['comparecolours', 'comparecolors', 'comparecolor', 'comparecolour', 'compare'])) {
         const [name1, name2] = message.content.split(' ').slice(1).join(' ').split(',');
         const colour1 = determineColour(toID(name1));
         const colour2 = determineColour(toID(name2));
