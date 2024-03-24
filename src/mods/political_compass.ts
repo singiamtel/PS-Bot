@@ -1,4 +1,3 @@
-// const db = require('../db.js').db;
 import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import db from '../db.js';
@@ -9,7 +8,7 @@ import { logger } from '../logger.js';
 
 export function politicalCompass(message: Message, username: string) {
     if (username === 'unknown') {
-        logger.warn('politicalCompass: Unknown user ' + message.author.name + ', content: ' + message.content);
+        logger.warn({ cmd: 'politicalCompass', message: 'Unknown user', user: message.author.name });
         return;
     }
     if (isCmd(message, 'addpc')) {
@@ -37,14 +36,14 @@ export function politicalCompass(message: Message, username: string) {
         // find the user in the database
         db.get('SELECT * FROM pc WHERE name = ?', [user], (err, row) => {
             if (err) {
-                logger.error(err);
+                logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', user, error: err });
                 return;
             }
             if (row === undefined) {
                 // add the user to the database
                 db.run('INSERT INTO pc (name, economic, social) VALUES (?, ?, ?)', [user, ec, soc], (err) => {
                     if (err) {
-                        logger.error(err);
+                        logger.error({ cmd: 'politicalCompass', message: 'Error inserting into db', user, error: err });
                         return;
                     }
                     message.reply('Political compass has been added!');
@@ -53,7 +52,7 @@ export function politicalCompass(message: Message, username: string) {
                 // update the user's political compass
                 db.run('UPDATE pc SET economic = ?, social = ? WHERE name = ?', [ec, soc, user], (err) => {
                     if (err) {
-                        logger.error(err);
+                        logger.error({ cmd: 'politicalCompass', message: 'Error updating points', user, error: err });
                         return;
                     }
                     message.reply('Political compass has been updated!');
@@ -66,7 +65,7 @@ export function politicalCompass(message: Message, username: string) {
         const username = toID(user);
         db.get('SELECT * FROM pc WHERE name = ?', [username], (err, row) => {
             if (err) {
-                logger.error(err);
+                logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', user, error: err });
                 return;
             }
             if (!row) {
@@ -93,7 +92,7 @@ export function politicalCompass(message: Message, username: string) {
         // find all users in the database
         db.all('SELECT * FROM pc', [], (err, rows) => {
             if (err) {
-                logger.error(err);
+                logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', error: err });
                 return;
             }
             if (rows === undefined) {

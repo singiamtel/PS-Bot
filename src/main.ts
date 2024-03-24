@@ -12,7 +12,7 @@ import { randopple } from './mods/randopple.js';
 import { hook } from './hook.js';
 import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBsetAnswer, MBshowAnswerBox, MBtestAuth, leaderboard } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
-import { isCmd, isRoom } from './utils.js';
+import { isRoom } from './utils.js';
 
 import express from 'express';
 import morgan from 'morgan';
@@ -25,7 +25,7 @@ client.on('message', (message) => {
 
     if (!username) return; // System messages
     const target = isRoom(message.target) ? message.target.roomid : 'pm';
-    logger.verbose(`Message from ${username}@${target}: ${message.content}`);
+    logger.verbose({ cmd: 'chat', message: message.content, username, target });
 
     // Public for all
     saveChat(message, username);
@@ -58,19 +58,6 @@ client.on('message', (message) => {
     // Me only
 
     politicalCompass(message, username);
-
-    // if (isCmd(message, 'eval')) {
-    //     const code = message.content.split(' ').slice(1).join(' ');
-    //     try {
-    //         const result = eval(code);
-    //         message.reply(result);
-    //     } catch (err) {
-    //         logger.error(err);
-    //         message.reply((err as Error)?.message || 'Eval failed');
-    //     }
-    // } else if (isCmd(message, 'ping')) {
-    //     message.reply('Pong!');
-    // }
 });
 
 // 2 minutes
@@ -83,7 +70,7 @@ const timer = setTimeout(
 
 
 client.on('login', () => {
-    logger.info('Connected to chat');
+    logger.info({ cmd: 'login', message: 'Connected to chat' });
     clearTimeout(timer);
     loadCustomColors();
     client.send(`|/autojoin ${config.rooms.join(',')}`);

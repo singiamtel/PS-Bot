@@ -49,14 +49,12 @@ export function MBsetAnswer(message: Message) {
         room.send(`!rfaq mysterybox`);
     }
 }
-// const cooldownTime = 30 * 1000; // 30 seconds
 
 const botMsg = /^\/botmsg /i;
 export function MBanswerQuestion(message: Message) {
-    // const hostRoom = 'groupchat-itszxc-44323579';
     const text = message.content;
     if (isCmd(message, 'answer')) {
-        logger.verbose('Answering question: ' + text);
+        logger.info({ cmd: 'mysteryboxAnswer', message: 'Answering question', content: text });
         const question = getQuestion();
         const { answer, difficulty } = question;
         const answerInRoom = botMsg.test(text);
@@ -86,7 +84,7 @@ export function MBanswerQuestion(message: Message) {
             if (winners.length <= 3) {
                 const room = client.rooms.get(hostRoom);
                 if (!room) {
-                    logger.error('Bot is not present in the host room ' + hostRoom + ' ' + message.content);
+                    logger.error({ cmd: 'mysteryboxAnswer', message: 'Can\'t declare winner, bot is not present in the host room', room: hostRoom, content: message.content });
                     return;
                 }
                 room.send(`/adduhtml MB${winners.length}, <div class="broadcast-blue"><center>${message.author.name} has answered in ${toOrdinal(winners.length)} place!</center></div>`);
@@ -100,8 +98,6 @@ export function MBanswerQuestion(message: Message) {
             } else {
                 reply(message, 'Wrong answer, please try again.');
             }
-            const now = new Date();
-            // cooldowns.push({ [message.author.id]: now });
             addCooldown(message.author.id);
             return;
         }
@@ -119,7 +115,6 @@ function refreshAnswerBox(message: Message, user: string | null) {
 
 export function MBshowAnswerBox(message: Message) {
     if (isCmd(message, 'answerbox')) {
-        logger.verbose('Showing answer box: ' + message.content);
         const isBotMsg = botMsg.test(message.content);
         if (isBotMsg) {
             return refreshAnswerBox(message, message.author.id);
@@ -139,20 +134,20 @@ export function MBshowAnswerBox(message: Message) {
 
 function addPointsToUser(user: string, points: number, cb: () => void) {
     db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-        if (err) return logger.error(err);
+        if (err) return logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error getting from db', user, points, error: err });
         if (!rows || rows.length === 0) {
             const query = `INSERT INTO mysterybox(name, points) VALUES(? , ?)`;
             db.run(query, [user, points], err => {
                 if (err) {
-                    logger.error(err);
+                    logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error inserting into db', user, points, error: err });
                     return;
                 }
                 cb();
             });
         } else {
-            db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + (rows[0] as any).points, user], err => {
+            db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + rows[0].points, user], err => {
                 if (err) {
-                    logger.error(err);
+                    logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error updating points', user, points, error: err });
                     return;
                 }
                 cb();
@@ -184,7 +179,7 @@ export function leaderboard(cb: (leaderboard: string) => void, { limit = 10, htm
         return cb(leaderboardCache.table);
     }
     db.all('SELECT * FROM mysterybox ORDER BY points DESC LIMIT ' + limit, (err, rows:any) => {
-        if (err) return logger.error(err);
+        if (err) return logger.error({ cmd: 'leaderboard', message: 'Error getting from db', error: err });
         if (!html) { return cb(rows.map((row:any) => `${row.points === rows[0].points ? '👑 ' : ''}${row.name}: ${row.points}`).join('\n')); }
         const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row:any) => `<tr><td style="border:1px solid; padding:3px">${row.points === rows[0].points ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
         leaderboardCache.table = htmlTable;
@@ -230,7 +225,7 @@ export function MBrank(message: Message) {
         const user = toID(displayname);
         if (user === 'unknown') return message.reply('Please specify a user.');
         db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-            if (err) return logger.error(err);
+            if (err) return logger.error({ cmd: 'mysteryboxRank', message: 'Error getting from db', user, error: err });
             if (!rows || rows.length === 0) {
                 if (!isRoom(message.target) || isAuth(message)) {
                     return isBotMsg ? privateHTML(message, `${displayname} has no points yet.`, hostRoom) : message.reply(`${displayname} has no points yet.`);

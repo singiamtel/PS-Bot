@@ -9,13 +9,13 @@ import path from 'path';
 dotenv.config({ path: path.join(rootDir, '../.env') });
 
 if (process.env.botusername === undefined || process.env.botpassword === undefined) {
-    logger.error('No username or password found in .env file. Exiting...');
+    logger.error({ cmd: 'bot', message: 'No username or password found in .env file. Exiting...' });
     process.exit(1);
 }
 
-const client = new Client({ username: process.env.botusername, password: process.env.botpassword, debug: true, avatar: 'supernerd', rooms: [] });
+const client = new Client({ username: process.env.botusername, password: process.env.botpassword, avatar: 'supernerd', rooms: [] });
 
-logger.info('Connecting to PS...');
+logger.info({ cmd: 'bot', message: 'Connecting to PS...' });
 client.connect();
 
 export default client;
@@ -30,7 +30,7 @@ try {
     const data = fs.readFileSync(configPath, 'utf8');
     __config = JSON.parse(data);
 } catch (err) {
-    logger.info('No config.json file found. Creating one...');
+    logger.info({ cmd: 'bot', message: 'No config.json file found. Creating one...' });
     fs.writeFileSync(configPath, JSON.stringify(__config, null, 2), 'utf8');
 }
 
@@ -62,7 +62,7 @@ export function isAuth(message: Message, room?: string) {
             const authList = Object.entries(client.getRoom(room).auth).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] > 4).map(([_rank, userArray]) => userArray).flat().map(toID);
             return authList.includes(toID(message.author.id));
         } else {
-            logger.error('No auth object found for room ' + room);
+            logger.error({ cmd: 'bot', message: 'No auth object found in room', room });
             return false;
         }
     }
@@ -81,8 +81,7 @@ export function reply(message: Message, content: string, { inPm = true } : { inP
 
 export function privateHTML(message: Message, content: string, room: string) {
     if (!isRoom) return message.author.send(content);
-    logger.verbose('Sending private HTML to ' + message.author.id + ': ' + content + ' in room ' + message.raw);
     return message.reply(`/msgroom ${room},/sendprivatehtmlbox  ${message.author.id}, ${content}`);
 }
 
-logger.info('Loaded config: ' + JSON.stringify(config));
+logger.info({ cmd: 'bot', message: 'Loaded config', config });

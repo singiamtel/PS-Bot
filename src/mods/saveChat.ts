@@ -11,7 +11,7 @@ import { logger } from '../logger.js';
 
 const pathToChat = path.join(rootDir, '../chat.txt');
 const stream = fs.createWriteStream(pathToChat, { flags: 'a' });
-logger.info('Chat stream started in', pathToChat);
+logger.info({ cmd: 'saveChat', message: 'Chat stream created', path: pathToChat });
 
 export const saveChat = (message: Message, username: string) => {
     // YYYY-MM-DD HH:MM:SS

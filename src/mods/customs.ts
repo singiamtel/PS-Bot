@@ -1,4 +1,3 @@
-// const fs = require("fs");
 import fs from 'fs';
 import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
@@ -16,7 +15,7 @@ try {
     const data = fs.readFileSync(customsPath, 'utf8');
     customs = JSON.parse(data);
 } catch (err) {
-    logger.info('No customs.json file found. Creating one in', customsPath);
+    logger.verbose({ cmd: 'customs', message: 'No customs.json file found. Creating one in', path: customsPath });
     fs.writeFileSync(customsPath, JSON.stringify(customs, null, 2), 'utf8');
 }
 

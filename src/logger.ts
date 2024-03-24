@@ -1,16 +1,15 @@
-import * as winston from 'winston';
+import { format, createLogger, transports } from 'winston';
 
-const myFormat = winston.format.printf(({ level, message, timestamp }) => `${timestamp} [${level}]: ${message}`);
-
-export const logger = winston.createLogger({
+export const logger = createLogger({
     level: 'verbose',
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        myFormat
+    format: format.combine(
+        format.timestamp({
+            format: 'YYYY-MM-DD HH:mm:ss',
+        }),
+        format.json(),
     ),
     transports: [
-        new winston.transports.Console({
-            stderrLevels: ['error', 'warn'],
-        }),
+        new transports.Console(),
+        new transports.File({ filename: 'bot.log' }),
     ],
 });
