@@ -59,18 +59,18 @@ client.on('message', (message) => {
 
     politicalCompass(message, username);
 
-    if (isCmd(message, 'eval')) {
-        const code = message.content.split(' ').slice(1).join(' ');
-        try {
-            const result = eval(code);
-            message.reply(result);
-        } catch (err) {
-            logger.error(err);
-            message.reply((err as Error)?.message || 'Eval failed');
-        }
-    } else if (isCmd(message, 'ping')) {
-        message.reply('Pong!');
-    }
+    // if (isCmd(message, 'eval')) {
+    //     const code = message.content.split(' ').slice(1).join(' ');
+    //     try {
+    //         const result = eval(code);
+    //         message.reply(result);
+    //     } catch (err) {
+    //         logger.error(err);
+    //         message.reply((err as Error)?.message || 'Eval failed');
+    //     }
+    // } else if (isCmd(message, 'ping')) {
+    //     message.reply('Pong!');
+    // }
 });
 
 // 2 minutes
