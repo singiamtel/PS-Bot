@@ -4,9 +4,10 @@ import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import { toID } from 'ps-client/tools.js';
 import { isCmd } from '../utils.js';
+import { config } from '../bot.js';
 
 function canUHTML(message: Message, username : string | undefined) {
-    return message.type === 'chat' && message.target instanceof Room && username && message.target.auth['*'].includes(toID(username));
+    return message.type === 'chat' && message.target instanceof Room && username && message.target.auth['*']?.includes(toID(config.name));
 }
 
 export function nameColour(message: Message, username: string | undefined) {
