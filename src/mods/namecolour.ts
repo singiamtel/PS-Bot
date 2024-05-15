@@ -7,7 +7,7 @@ import { isCmd } from '../utils.js';
 import { config } from '../bot.js';
 
 function canUHTML(message: Message, username : string | undefined) {
-    return message.type === 'chat' && message.target instanceof Room && username && message.target.auth['*']?.includes(toID(config.name));
+    return message.type === 'chat' && message.target instanceof Room && username && message.target.auth && message.target.auth['*']?.includes(toID(config.name));
 }
 
 export function nameColour(message: Message, username: string | undefined) {
