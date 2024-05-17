@@ -20,183 +20,182 @@ import { logger } from './logger.js';
 import { saveChat } from './mods/saveChat.js';
 
 client.on('message', (message) => {
-  if (message.isIntro || message.author?.name === client.status.username || message.author?.name === undefined) return;
-  const username = toID(message.author?.name);
+    if (message.isIntro || message.author?.name === client.status.username || message.author?.name === undefined) return;
+    const username = toID(message.author?.name);
 
-  if (!username) return; // System messages
-  const target = isRoom(message.target) ? message.target.roomid : 'pm';
+    if (!username) return; // System messages
+    const target = isRoom(message.target) ? message.target.roomid : 'pm';
 
-  logger.verbose({ cmd: 'chat', message: message.content, username, target });
-  saveChat(message, username);
-  apologyCounter(message, username);
+    logger.verbose({ cmd: 'chat', message: message.content, username, target });
+    saveChat(message, username);
+    apologyCounter(message, username);
 
-  // Not voice
-  if (message.msgRank !== ' ' && message.msgRank !== undefined) {
-    answerToCustoms(message);
-  }
+    // Not voice
+    if (message.msgRank !== ' ' && message.msgRank !== undefined) {
+        answerToCustoms(message);
+    }
 
-  const cmd = toCmd(message);
-  if (!cmd) return;
-  // const hasPerms = getAuth(message) || isRoomAuth || config.whitelist.includes(username)
-  console.log('cmd', cmd);
+    const cmd = toCmd(message);
+    if (!cmd) return;
+    // const hasPerms = getAuth(message) || isRoomAuth || config.whitelist.includes(username)
+    console.log('cmd', cmd);
 
-  switch (cmd) {
+    switch (cmd) {
+        // 'namecolour', 'namecolor',
+        // 'comparecolours', 'comparecolors', 'comparecolor', 'comparecolour', 'compare',
+        case 'namecolour':
+        case 'namecolor':
+            if (!atLeast('+', message)) return;
+            nameColour(message, client.status.username);
+            break;
 
-  // 'namecolour', 'namecolor',
-  // 'comparecolours', 'comparecolors', 'comparecolor', 'comparecolour', 'compare',
-    case 'namecolour':
-    case 'namecolor':
-      if (!atLeast('+', message)) return;
-      nameColour(message, client.status.username);
-      break;
+        case 'comparecolours':
+        case 'comparecolors':
+        case 'comparecolor':
+        case 'comparecolour':
+        case 'compare':
+            if (!atLeast('+', message)) return;
+            compareColours(message, client.status.username);
+            break;
 
-    case 'comparecolours':
-    case 'comparecolors':
-    case 'comparecolor':
-    case 'comparecolour':
-    case 'compare':
-      if (!atLeast('+', message)) return;
-      compareColours(message, client.status.username);
-      break;
+        case 'ttp':
+            console.log('ttp');
+            if (!atLeast('+', message)) return;
+            console.log('ttp past filter');
+            ttp(message, 1);
+            console.log('ttp');
+            break;
 
-    case 'ttp':
-      console.log('ttp');
-      if (!atLeast('+', message)) return;
-      console.log('ttp past filter');
-      ttp(message, 1);
-      console.log('ttp');
-      break;
+        case 'ttp2':
+            if (!atLeast('+', message)) return;
+            ttp(message, 2);
+            console.log('ttp2');
+            break;
 
-    case 'ttp2':
-      if (!atLeast('+', message)) return;
-      ttp(message, 2);
-      console.log('ttp2');
-      break;
+        case 'randttp':
+            if (!atLeast('+', message)) return;
+            randttp(message, 1);
+            console.log('ttp2');
+            break;
 
-    case 'randttp':
-      if (!atLeast('+', message)) return;
-      randttp(message, 1);
-      console.log('ttp2');
-      break;
+        case 'randttp2':
+            if (!atLeast('+', message)) return;
+            randttp(message, 2);
+            console.log('ttp2');
+            break;
 
-    case 'randttp2':
-      if (!atLeast('+', message)) return;
-      randttp(message, 2);
-      console.log('ttp2');
-      break;
+        case 'randopple':
+            if (!atLeast('+', message)) return;
+            randopple(message);
+            console.log('ttp2');
+            break;
 
-    case 'randopple':
-      if (!atLeast('+', message)) return;
-      randopple(message);
-      console.log('ttp2');
-      break;
+        case 'rank':
+            MBrank(message);
+            break;
 
-    case 'rank':
-      MBrank(message);
-      break;
+        case 'answerbox':
+            MBshowAnswerBox(message);
+            break;
 
-    case 'answerbox':
-      MBshowAnswerBox(message);
-      break;
+        case 'leaderboard':
+        case 'lb':
+            MBleaderboard(message);
+            break;
 
-    case 'leaderboard':
-    case 'lb':
-      MBleaderboard(message);
-      break;
+        case 'testauth':
+            MBtestAuth(message);
+            break;
 
-    case 'testauth':
-      MBtestAuth(message);
-      break;
+        case 'answer':
+            MBanswerQuestion(message);
+            break;
 
-    case 'answer':
-      MBanswerQuestion(message);
-      break;
+        case 'newquestion':
+            if (!atLeast('%', message)) return;
+            MBcreateQuestion(message);
+            break;
 
-    case 'newquestion':
-      if (!atLeast('%', message)) return;
-      MBcreateQuestion(message);
-      break;
+        case 'endquestion':
+            if (!atLeast('%', message)) return;
+            MBendQuestion(message);
+            break;
 
-    case 'endquestion':
-      if (!atLeast('%', message)) return;
-      MBendQuestion(message);
-      break;
+        case 'declare':
+            if (!atLeast('%', message)) return;
+            MBdeclareQuestion(message);
+            break;
 
-    case 'declare':
-      if (!atLeast('%', message)) return;
-      MBdeclareQuestion(message);
-      break;
+        case 'addp':
+            if (!atLeast('%', message)) return;
+            MBaddPoints(message);
+            break;
 
-    case 'addp':
-      if (!atLeast('%', message)) return;
-      MBaddPoints(message);
-      break;
+        case 'addcustom':
+            if (!atLeast('#', message)) return;
+            addCustom(message);
+            break;
 
-    case 'addcustom':
-      if (!atLeast('#', message)) return;
-      addCustom(message);
-      break;
+        case 'deletecustom':
+        case 'delcustom':
+        case 'removecustom':
+            if (!atLeast('#', message)) return;
+            deleteCustom(message);
+            break;
 
-    case 'deletecustom':
-    case 'delcustom':
-    case 'removecustom':
-      if (!atLeast('#', message)) return;
-      deleteCustom(message);
-      break;
+        case 'showcustom':
+        case 'customs':
+        case 'listcustom':
+            if (!atLeast('%', message)) return;
+            showCustoms(message);
+            break;
 
-    case 'showcustom':
-    case 'customs':
-    case 'listcustom':
-      if (!atLeast('%', message)) return;
-      showCustoms(message);
-      break;
+        case 'top':
+            if (!config.whitelist.includes(username)) return;
+            showApologiesLeaderboard(message);
+            break;
 
-    case 'top':
-      if (!config.whitelist.includes(username)) return;
-      showApologiesLeaderboard(message);
-      break;
+        case 'apologies':
+            if (!config.whitelist.includes(username)) return;
+            showApologiesRank(message);
+            break;
 
-    case 'apologies':
-      if (!config.whitelist.includes(username)) return;
-      showApologiesRank(message);
-      break;
+        case 'addpc':
+            if (!config.whitelist.includes(username)) return;
+            addPoliticalCompass(message);
+            break;
 
-    case 'addpc':
-      if (!config.whitelist.includes(username)) return;
-      addPoliticalCompass(message);
-      break;
+        case 'pc':
+            if (!config.whitelist.includes(username)) return;
+            politicalCompass(message, username);
+            break;
 
-    case 'pc':
-      if (!config.whitelist.includes(username)) return;
-      politicalCompass(message, username);
-      break;
+        case 'pcall':
+            if (!config.whitelist.includes(username)) return;
+            showCombinedPoliticalCompass(message);
+            break;
 
-    case 'pcall':
-      if (!config.whitelist.includes(username)) return;
-      showCombinedPoliticalCompass(message);
-      break;
+        default:
+            assertNever(cmd);
+    }
 
-    default:
-      assertNever(cmd);
-  }
-
-  if (!config.whitelist.includes(username)) return;
+    if (!config.whitelist.includes(username)) return;
 });
 
 // 1 minute
 const timer = setTimeout(
-  () => {
-    hook.send('<@&1196484431062515752> Bad');
-  },
-  1000 * 60 * 1,
+    () => {
+        hook.send('<@&1196484431062515752> Bad');
+    },
+    1000 * 60 * 1,
 );
 
 
 client.on('login', () => {
-  logger.info({ cmd: 'login', message: 'Connected to chat' });
-  clearTimeout(timer);
-  loadCustomColors();
-  client.send(`|/autojoin ${config.rooms.join(',')}`);
+    logger.info({ cmd: 'login', message: 'Connected to chat' });
+    clearTimeout(timer);
+    loadCustomColors();
+    client.send(`|/autojoin ${config.rooms.join(',')}`);
 });
 
 const app = express();
@@ -204,19 +203,19 @@ const app = express();
 app.use(morgan('combined'));
 
 app.get('/roomba', (_req, res) => {
-  res.redirect('/roomba/mysterybox/leaderboard');
+    res.redirect('/roomba/mysterybox/leaderboard');
 });
 
 app.get('/roomba/mysterybox/leaderboard', async (_req, res) => {
-  const lb = await new Promise((resolve) => {
-    leaderboard(resolve, { limit: 1000 });
-  });
-  res.send(lb);
+    const lb = await new Promise((resolve) => {
+        leaderboard(resolve, { limit: 1000 });
+    });
+    res.send(lb);
 });
 
 app.get('/roomba/mysterybox/currentAnswers', (_req, res) => {
-  const answers = MBgetAnswers();
-  res.send(`<h1>Current Answers: ${answers.length}</h1>
+    const answers = MBgetAnswers();
+    res.send(`<h1>Current Answers: ${answers.length}</h1>
   ${answers.map((a) => `<p style="color:${determineColour(a)}">${a}</p>`).join('\n')}
   `);
 });

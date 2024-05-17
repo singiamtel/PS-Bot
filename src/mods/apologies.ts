@@ -30,22 +30,22 @@ export function apologyCounter(message: Message, username: string) {
 }
 
 export function showApologiesLeaderboard(message : Message) {
-        db.all('SELECT * FROM apologies ORDER BY points DESC LIMIT 5', (err, rows:any) => {
-            if (err) return logger.error({ cmd: 'apologyshow', message: 'Error getting from db', error: err });
-            const htmlTable = `<table><tr><th>Name</th><th>Apologies</th></tr>${rows.map((row:any) => `<tr><td>${row.name}</td><td>${row.points}</td></tr>`).join('')}</table>`;
-            message.reply(`!htmlbox ${htmlTable}`);
-        });
+    db.all('SELECT * FROM apologies ORDER BY points DESC LIMIT 5', (err, rows:any) => {
+        if (err) return logger.error({ cmd: 'apologyshow', message: 'Error getting from db', error: err });
+        const htmlTable = `<table><tr><th>Name</th><th>Apologies</th></tr>${rows.map((row:any) => `<tr><td>${row.name}</td><td>${row.points}</td></tr>`).join('')}</table>`;
+        message.reply(`!htmlbox ${htmlTable}`);
+    });
 }
 
 export function showApologiesRank(message : Message) {
-        // Allow spaces in usernames
-        const displayname = message.content.split(' ').slice(1).join(' ');
-        const user = toID(displayname);
-        if (user === 'unknown') return message.reply('Please specify a user.');
-        db.all('SELECT * FROM apologies WHERE name = ? ORDER BY points DESC LIMIT 10', [user], (err, rows: any) => {
-            if (err) return logger.error({ cmd: 'apologyshow', message: 'Error getting from db', username: user, error: err });
-            if (!rows || rows.length === 0) return message.reply('No apologies yet.');
-            const apologies = rows[0].points;
-            return message.reply(`Apologies by ${displayname}: ${apologies}`);
-        });
+    // Allow spaces in usernames
+    const displayname = message.content.split(' ').slice(1).join(' ');
+    const user = toID(displayname);
+    if (user === 'unknown') return message.reply('Please specify a user.');
+    db.all('SELECT * FROM apologies WHERE name = ? ORDER BY points DESC LIMIT 10', [user], (err, rows: any) => {
+        if (err) return logger.error({ cmd: 'apologyshow', message: 'Error getting from db', username: user, error: err });
+        if (!rows || rows.length === 0) return message.reply('No apologies yet.');
+        const apologies = rows[0].points;
+        return message.reply(`Apologies by ${displayname}: ${apologies}`);
+    });
 }
