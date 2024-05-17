@@ -1,7 +1,6 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
 import { toID } from 'ps-client/tools.js';
-import { isCmd } from '../utils.js';
 import { logger } from '../logger.js';
 import { config } from '../bot.js';
 
@@ -30,15 +29,15 @@ export function apologyCounter(message: Message, username: string) {
     }
 }
 
-export function apologyShower(message : Message) {
-    if (isCmd(message, 'top')) {
+export function showApologiesLeaderboard(message : Message) {
         db.all('SELECT * FROM apologies ORDER BY points DESC LIMIT 5', (err, rows:any) => {
             if (err) return logger.error({ cmd: 'apologyshow', message: 'Error getting from db', error: err });
             const htmlTable = `<table><tr><th>Name</th><th>Apologies</th></tr>${rows.map((row:any) => `<tr><td>${row.name}</td><td>${row.points}</td></tr>`).join('')}</table>`;
             message.reply(`!htmlbox ${htmlTable}`);
         });
-    }
-    if (isCmd(message, 'apologies')) {
+}
+
+export function showApologiesRank(message : Message) {
         // Allow spaces in usernames
         const displayname = message.content.split(' ').slice(1).join(' ');
         const user = toID(displayname);
@@ -49,5 +48,4 @@ export function apologyShower(message : Message) {
             const apologies = rows[0].points;
             return message.reply(`Apologies by ${displayname}: ${apologies}`);
         });
-    }
 }
