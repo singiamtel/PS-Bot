@@ -12,6 +12,6 @@ export const logger = createLogger({
     ),
     transports: [
         new transports.Console(),
-        new transports.File({ filename: path.join(rootDir, './roomba_log.jsonl') }),
+        new transports.File({ filename: path.join(rootDir, '../roomba_log.jsonl') }),
     ],
 });
