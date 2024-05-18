@@ -1,4 +1,6 @@
 import { format, createLogger, transports } from 'winston';
+import { rootDir } from './utils';
+import path from 'path';
 
 export const logger = createLogger({
     level: 'verbose',
@@ -10,6 +12,6 @@ export const logger = createLogger({
     ),
     transports: [
         new transports.Console(),
-        new transports.File({ filename: 'bot.log' }),
+        new transports.File({ filename: path.join(rootDir, './bot.log') }),
     ],
 });
