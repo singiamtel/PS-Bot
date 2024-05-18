@@ -1,5 +1,5 @@
 import { format, createLogger, transports } from 'winston';
-import { rootDir } from './utils';
+import { rootDir } from './utils.js';
 import path from 'path';
 
 export const logger = createLogger({
