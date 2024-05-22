@@ -185,7 +185,7 @@ client.on('message', (message) => {
 // 1 minute
 const timer = setTimeout(
     () => {
-        hook.send('<@&1196484431062515752> Bad');
+        hook.send(`<@&1196484431062515752> couldn't connect to showdown chat`);
     },
     1000 * 60 * 1,
 );
