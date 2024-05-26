@@ -58,7 +58,7 @@ export const rankOrder: Record<Rank, number> = {
 
 export function roomAtLeast(minRank: Rank, message: Message, room: string) {
   if (config.whitelist.includes(message.author?.id)) { return true; }
-  if(atLeast(minRank, message)) return true; // Global perms
+  if(atLeast(minRank, message, true)) return true; // Global perms
 
   const authObject = client.getRoom(room)?.auth;
   if (!authObject) {
@@ -70,14 +70,14 @@ export function roomAtLeast(minRank: Rank, message: Message, room: string) {
 }
 
 
-export function atLeast(rank: Rank, message: Message) {
+export function atLeast(rank: Rank, message: Message, quiet = false) {
   if (config.whitelist.includes(toID(message.author.name))) return true; // whitelist
   console.log('atLeast', message.msgRank, rank);
   if (message.msgRank === undefined) {
     return false;
   }
   const hasPerms = rankOrder[message.msgRank] >= rankOrder[rank];
-  if (!hasPerms) {
+  if (!hasPerms && !quiet) {
     logger.warn({ cmd: 'chat', error: 'User does not have permission', username: toID(message.author.name), rank: message.msgRank, requiredRank: rank, message: message.content });
   }
   return hasPerms;
