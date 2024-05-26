@@ -1,6 +1,6 @@
 
 import { determineColour, loadCustomColors } from './namecolour.js';
-import client, { atLeast, config } from './bot.js';
+import client, { atLeast, config, roomAtLeast } from './bot.js';
 
 // Mods
 import { apologyCounter, showApologiesLeaderboard, showApologiesRank } from './mods/apologies.js';
@@ -112,22 +112,22 @@ client.on('message', (message) => {
             break;
 
         case 'newquestion':
-            if (!atLeast('%', message)) return;
+            if (!roomAtLeast('%', message, config.hostRoom)) return;
             MBcreateQuestion(message);
             break;
 
         case 'endquestion':
-            if (!atLeast('%', message)) return;
+            if (!roomAtLeast('%', message, config.hostRoom)) return;
             MBendQuestion(message);
             break;
 
         case 'declare':
-            if (!atLeast('%', message)) return;
+            if (!roomAtLeast('%', message, config.hostRoom)) return;
             MBdeclareQuestion(message);
             break;
 
         case 'addp':
-            if (!atLeast('%', message)) return;
+            if (!roomAtLeast('%', message, config.hostRoom)) return;
             MBaddPoints(message);
             break;
 

@@ -1,7 +1,7 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
 import { inAllowedRooms, isRoom, rootDir, toOrdinal } from '../utils.js';
-import client, { atLeast, config, privateHTML, reply } from '../bot.js';
+import client, { atLeast, config, privateHTML, reply, roomAtLeast } from '../bot.js';
 
 import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
@@ -16,7 +16,7 @@ const legalDifficulties = ['easy', 'medium', 'hard'];
 const hostRoom = config.hostRoom;
 
 export function MBtestAuth(message: Message) {
-    return atLeast('%', message) ? reply(message, `You are auth in ${hostRoom}.`) : reply(message, `You are not auth in ${hostRoom}.`);
+    return roomAtLeast('%', message, hostRoom) ? reply(message, `You are auth in ${hostRoom}.`) : reply(message, `You are not auth in ${hostRoom}.`);
 }
 
 export function MBendQuestion(message: Message) {
