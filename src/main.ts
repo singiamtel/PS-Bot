@@ -193,6 +193,7 @@ const timer = setTimeout(
 
 client.on('login', () => {
     logger.info({ cmd: 'login', message: 'Connected to chat' });
+    hook.send(`Connected to showdown chat`);
     clearTimeout(timer);
     loadCustomColors();
     client.send(`|/autojoin ${config.rooms.join(',')}`);
