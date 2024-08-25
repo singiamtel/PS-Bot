@@ -1,12 +1,7 @@
 import { Message, Room, User } from 'ps-client';
-import { config } from './bot.js';
+import { config, rootDir } from './config.js';
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-export const rootDir = __dirname;
+export { rootDir, config };
 
 export function padTo2Digits(num: number) {
     return num.toString().padStart(2, '0');

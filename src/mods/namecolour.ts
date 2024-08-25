@@ -3,7 +3,7 @@ import { determineColour, hexColorDelta } from '../namecolour.js';
 import { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import { toID } from 'ps-client/tools.js';
-import { config } from '../bot.js';
+import { config } from '../config.js';
 
 function canUHTML(message: Message, username: string | undefined) {
     return message.type === 'chat' && message.target instanceof Room && username && message.target.auth && message.target.auth['*']?.includes(toID(config.name));

@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
-import fs from 'fs';
 
 import { Client, Message } from 'ps-client';
 import { toID } from 'ps-client/tools.js';
 import { logger } from './logger.js';
+import { config } from './config.js';
 import { isRoom, rootDir } from './utils.js';
 import path from 'path';
 dotenv.config({ path: path.join(rootDir, '../.env') });
@@ -19,29 +19,6 @@ logger.info({ cmd: 'bot', message: 'Connecting to PS...' });
 client.connect();
 
 export default client;
-
-let __config = {
-    rooms: [],
-    hostRoom: undefined,
-    imageCDN: undefined,
-};
-const configPath = path.join(rootDir, '../config.json');
-try {
-    const data = fs.readFileSync(configPath, 'utf8');
-    __config = JSON.parse(data);
-} catch (err) {
-    logger.info({ cmd: 'bot', message: 'No config.json file found. Creating one...' });
-    fs.writeFileSync(configPath, JSON.stringify(__config, null, 2), 'utf8');
-}
-
-export const config = {
-    prefix: process.env.prefix ?? '#',
-    whitelist: process.env.whitelist?.split(',').map((x) => x.trim()) || [],
-    rooms: __config.rooms,
-    hostRoom: __config.hostRoom ?? 'botdevelopment',
-    imageCDN: __config.imageCDN ?? 'https://cdn.crob.at/',
-    name: process.env.botusername,
-};
 
 export type Rank = Exclude<Message['msgRank'], undefined>;
 

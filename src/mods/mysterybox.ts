@@ -1,7 +1,8 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
 import { inAllowedRooms, isRoom, rootDir, toOrdinal } from '../utils.js';
-import client, { atLeast, config, privateHTML, reply, roomAtLeast } from '../bot.js';
+import client, { atLeast, privateHTML, reply, roomAtLeast } from '../bot.js';
+import { config } from '../config.js';
 
 import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';

@@ -2,7 +2,7 @@ import { Message } from 'ps-client';
 import db from '../db.js';
 import { toID } from 'ps-client/tools.js';
 import { logger } from '../logger.js';
-import { config } from '../bot.js';
+import { config } from '../config.js';
 
 const apologies = ['sorry', 'apologize', 'apologies', 'apologise', 'apology', 'sry'];
 const antiApologies = ['not sorry', 'not apologize', 'not apologies', 'not apologise', 'not apology', 'not sry', 'sorry but', 'sry but', 'won\'t apologise'];

@@ -1,5 +1,5 @@
 import { Message } from 'ps-client';
-import { config } from '../bot.js';
+import { config } from '../config.js';
 
 const editions = {
     1: {

@@ -1,6 +1,6 @@
-
 import { determineColour, loadCustomColors } from './namecolour.js';
-import client, { atLeast, config, roomAtLeast } from './bot.js';
+import client, { atLeast, roomAtLeast } from './bot.js';
+import { config } from './config.js';
 
 // Mods
 import { apologyCounter, showApologiesLeaderboard, showApologiesRank } from './mods/apologies.js';
