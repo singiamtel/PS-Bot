@@ -16,7 +16,7 @@ export function nameColour(message: Message, username: string | undefined) {
     if (canUHTML(message, username)) {
         const delta = hexColorDelta(nameColour, colour.hex);
         const fixedDelta = (delta * 100).toFixed(2);
-        return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${colour.name} (${fixedDelta}% match)`);
+        return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${nameColour}<br> I think that's <strong style="color:#${colour.hex}; ">${colour.name}</strong> (${fixedDelta}% match)`);
     } else { return message.reply(`I think that's ${colour.name} (#${colour.hex})`); }
 }
 
