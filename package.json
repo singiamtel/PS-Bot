@@ -27,7 +27,7 @@
     "dev": "tsx watch src/main.ts",
     "build": "tsc",
     "start": "npm run build && node dist/main.js",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   }
 }
