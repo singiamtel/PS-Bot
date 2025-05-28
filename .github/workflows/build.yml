@@ -1,4 +1,4 @@
-name: Bun CI
+name: Node.js CI
 
 on:
   push:
@@ -9,12 +9,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
     steps:
     - uses: actions/checkout@v3
-    - uses: oven-sh/setup-bun@v2
-    - run: bun install --frozen-lockfile
-    - run: bun i
-    - run: bunx tsc
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run lint
+    - run: npm run build
   deploy:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
