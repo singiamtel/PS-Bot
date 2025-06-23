@@ -13,7 +13,7 @@ if (process.env.botusername === undefined || process.env.botpassword === undefin
     process.exit(1);
 }
 
-const client = new Client({ username: process.env.botusername, password: process.env.botpassword, avatar: 'supernerd', rooms: [] });
+const client = new Client({ username: process.env.botusername, password: process.env.botpassword, avatar: 'supernerd', rooms: config.rooms });
 
 logger.info({ cmd: 'bot', message: 'Connecting to PS...' });
 client.connect();

@@ -196,7 +196,6 @@ client.on('login', () => {
     hook.send(`Connected to showdown chat`);
     clearTimeout(timer);
     loadCustomColors();
-    client.send(`|/autojoin ${config.rooms.join(',')}`);
 });
 
 const app = express();
