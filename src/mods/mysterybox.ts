@@ -1,17 +1,12 @@
 import { Message } from 'ps-client';
 import db from '../db.js';
-import { inAllowedRooms, isRoom, rootDir, toOrdinal } from '../utils.js';
+import { inAllowedRooms, isRoom, toOrdinal } from '../utils.js';
 import client, { atLeast, privateHTML, reply, roomAtLeast } from '../bot.js';
 import { config } from '../config.js';
 
-import dotenv from 'dotenv';
 import { toID } from 'ps-client/tools.js';
 import { addCooldown, addWinner, endQuestion, getQuestion, isInCooldown, isQuestionOngoing, newQuestion, winners } from './mysterybox_db.js';
 import { logger } from '../logger.js';
-import path from 'path';
-
-dotenv.config({ path: path.join(rootDir, '../.env') });
-
 
 const legalDifficulties = ['easy', 'medium', 'hard'];
 const hostRoom = config.hostRoom;

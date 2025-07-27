@@ -1,11 +1,6 @@
 import { Webhook } from 'discord-webhook-node';
-import path from 'path';
 
-import dotenv from 'dotenv';
-import { rootDir } from './utils.js';
 import { logger } from './logger.js';
-
-dotenv.config({ path: path.join(rootDir, '../.env') });
 
 const discord_webhook = process.env.discord_webhook;
 if (!discord_webhook) {
