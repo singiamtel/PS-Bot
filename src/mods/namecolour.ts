@@ -1,6 +1,6 @@
 import namer from 'color-namer';
 import { determineColour, hexColorDelta } from '../namecolour.js';
-import { Message } from 'ps-client';
+import type { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import { toID } from 'ps-client/tools.js';
 import { config } from '../config.js';

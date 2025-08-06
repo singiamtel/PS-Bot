@@ -3,7 +3,7 @@
 
 import fs from 'fs';
 import path from 'node:path';
-import { Message } from 'ps-client';
+import type { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 
 import { formatDate, rootDir } from '../utils.js';

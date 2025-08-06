@@ -1,4 +1,4 @@
-import { Client, Message } from 'ps-client';
+import { Client, type Message } from 'ps-client';
 import { toID } from 'ps-client/tools.js';
 import { logger } from './logger.js';
 import { config } from './config.js';

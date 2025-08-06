@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { Message } from 'ps-client';
+import type { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import { rootDir } from '../utils.js';
 import { logger } from '../logger.js';

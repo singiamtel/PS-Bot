@@ -1,4 +1,4 @@
-import { Message } from 'ps-client';
+import type { Message } from 'ps-client';
 import { config } from '../config.js';
 
 const editions = {

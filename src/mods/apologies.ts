@@ -1,4 +1,4 @@
-import { Message } from 'ps-client';
+import type { Message } from 'ps-client';
 import db from '../db.js';
 import { toID } from 'ps-client/tools.js';
 import { logger } from '../logger.js';

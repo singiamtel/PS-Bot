@@ -1,4 +1,4 @@
-import { Message } from 'ps-client';
+import type { Message } from 'ps-client';
 import Room from 'ps-client/classes/room.js';
 import db from '../db.js';
 import { URL } from 'node:url';

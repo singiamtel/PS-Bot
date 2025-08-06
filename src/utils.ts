@@ -1,4 +1,4 @@
-import { Message, Room, User } from 'ps-client';
+import { type Message, Room, type User } from 'ps-client';
 import { config, rootDir } from './config.js';
 
 export { rootDir, config };

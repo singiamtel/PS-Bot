@@ -1,4 +1,4 @@
-import { Message } from 'ps-client';
+import type { Message } from 'ps-client';
 import db from '../db.js';
 import { inAllowedRooms, isRoom, toOrdinal } from '../utils.js';
 import client, { atLeast, privateHTML, reply, roomAtLeast } from '../bot.js';
