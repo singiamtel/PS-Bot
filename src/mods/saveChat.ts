@@ -13,7 +13,7 @@ const pathToChat = path.join(rootDir, '../chat.txt');
 const stream = fs.createWriteStream(pathToChat, { flags: 'a' });
 logger.info({ cmd: 'saveChat', message: 'Chat stream created', path: pathToChat });
 
-export const saveChat = (message: Message, username: string) => {
+export const saveChat = (message: Message<'chat' | 'pm'>, username: string) => {
     // YYYY-MM-DD HH:MM:SS
     const logFriendlyDate = formatDate(new Date(message.time / 1000));
     const where = message.target instanceof Room ? message.target.roomid : 'pm';

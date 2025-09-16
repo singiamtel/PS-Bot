@@ -3,7 +3,7 @@ import { config } from '../config.js';
 
 const TTPurl = config.imageCDN + '/opples/';
 const nOpples = 23;
-export function randopple(message: Message) {
+export function randopple(message: Message<'chat' | 'pm'>) {
     const num = Math.floor(Math.random() * nOpples) + 1;
     message.reply(`!show ${TTPurl}${num}.png`);
 }

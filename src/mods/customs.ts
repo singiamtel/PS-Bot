@@ -18,7 +18,7 @@ try {
 }
 
 // Function to get response for a message
-export function answerToCustoms(message: Message) {
+export function answerToCustoms(message: Message<'chat' | 'pm'>) {
     if (!(message.target instanceof Room)) return;
 
     const text = message.content.trim().toLowerCase();
@@ -29,7 +29,7 @@ export function answerToCustoms(message: Message) {
 }
 
 // Function to add a custom message-response pair
-export function addCustom(message: Message) {
+export function addCustom(message: Message<'chat' | 'pm'>) {
     const args = message.content.split(' ').slice(1).join(' ').split(',');
     if (customs[args[0]]) return message.reply('That custom already exists.');
     const [key, value] = [args[0].trim().toLowerCase(), args.slice(1).join(',').trim()];
@@ -44,7 +44,7 @@ export function addCustom(message: Message) {
     return message.reply('Custom added.');
 }
 
-export function deleteCustom(message: Message) {
+export function deleteCustom(message: Message<'chat' | 'pm'>) {
     // Delete a custom
     const args = message.content.split(' ').slice(1).join(' ').split(',');
     if (!customs[args[0]]) return message.reply('That custom doesn\'t exist.');
@@ -54,7 +54,7 @@ export function deleteCustom(message: Message) {
     return message.reply('Custom deleted.');
 }
 
-export function showCustoms(message: Message) {
+export function showCustoms(message: Message<'chat' | 'pm'>) {
     return message.reply(`!code ${Object.keys(customs).join(`
 `)
     }`);

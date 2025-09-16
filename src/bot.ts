@@ -29,7 +29,7 @@ export const rankOrder: Record<Rank, number> = {
     ' ': 2,
 } as const;
 
-export function roomAtLeast(minRank: Rank, message: Message, room: string) {
+export function roomAtLeast(minRank: Rank, message: Message<'chat' | 'pm'>, room: string) {
     if (config.whitelist.includes(message.author?.id)) { return true; }
     if (atLeast(minRank, message, true)) return true; // Global perms
 
@@ -43,7 +43,7 @@ export function roomAtLeast(minRank: Rank, message: Message, room: string) {
 }
 
 
-export function atLeast(rank: Rank, message: Message, quiet = false) {
+export function atLeast(rank: Rank, message: Message<'chat' | 'pm'>, quiet = false) {
     if (config.whitelist.includes(toID(message.author.name))) return true; // whitelist
     console.log('atLeast', message.msgRank, rank);
     if (message.msgRank === undefined) {
@@ -59,14 +59,14 @@ export function atLeast(rank: Rank, message: Message, quiet = false) {
 
 // take an optional settings object parameter with a default value of true
 // if no settings object is provided, default to sending the message in PM
-export function reply(message: Message, content: string, { inPm = true }: { inPm?: boolean } = {}) {
+export function reply(message: Message<'chat' | 'pm'>, content: string, { inPm = true }: { inPm?: boolean } = {}) {
     if (inPm) {
         return message.author.send(content);
     }
     return message.reply(content);
 }
 
-export function privateHTML(message: Message, content: string, room: string) {
+export function privateHTML(message: Message<'chat' | 'pm'>, content: string, room: string) {
     if (!isRoom) return message.author.send(content);
     return message.reply(`/msgroom ${room},/sendprivatehtmlbox  ${message.author.id}, ${content}`);
 }

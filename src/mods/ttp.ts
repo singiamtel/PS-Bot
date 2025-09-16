@@ -12,7 +12,7 @@ const editions = {
     },
 };
 
-export function ttp(message: Message, edition: number) {
+export function ttp(message: Message<'chat' | 'pm'>, edition: number) {
     const url = editions[edition as keyof typeof editions]?.url;
     if (!url) return message.reply('Invalid edition');
     const num = message.content.split(' ')[1];
@@ -20,7 +20,7 @@ export function ttp(message: Message, edition: number) {
     message.reply(`!show ${url}card${num}.png`);
 }
 
-export function randttp(message: Message, edition: number) {
+export function randttp(message: Message<'chat' | 'pm'>, edition: number) {
     const config = editions[edition as keyof typeof editions];
     if (!config) return message.reply('Invalid edition');
     const num = Math.floor(Math.random() * config.cards) + 1;

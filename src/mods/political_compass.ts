@@ -5,7 +5,7 @@ import { URL } from 'node:url';
 import { toID } from 'ps-client/tools.js';
 import { logger } from '../logger.js';
 
-export function politicalCompass(message: Message, username: string) {
+export function politicalCompass(message: Message<'chat' | 'pm'>, username: string) {
     if (username === 'unknown') {
         logger.warn({ cmd: 'politicalCompass', message: 'Unknown user', user: message.author.name });
         return;
@@ -29,7 +29,7 @@ export function politicalCompass(message: Message, username: string) {
     });
 }
 
-export function addPoliticalCompass(message: Message) {
+export function addPoliticalCompass(message: Message<'chat' | 'pm'>) {
     // ec = economic
     // so = social
     let user = message.content.split(' ')[1];
@@ -79,7 +79,7 @@ export function addPoliticalCompass(message: Message) {
     });
 }
 
-export function showCombinedPoliticalCompass(message: Message) {
+export function showCombinedPoliticalCompass(message: Message<'chat' | 'pm'>) {
     //check the type of channel
     if (!(message.target instanceof Room)) { return; }
     if (message.target.type !== 'chat') {

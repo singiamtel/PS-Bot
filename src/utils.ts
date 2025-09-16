@@ -27,7 +27,7 @@ export function isRoom(target: User | Room): target is Room {
     return target instanceof Room;
 }
 
-export function inAllowedRooms(message: Message, rooms: string[]) {
+export function inAllowedRooms(message: Message<'chat' | 'pm'>, rooms: string[]) {
     rooms.push('botdevelopment'); // Allow bot development
     return isRoom(message.target) && rooms.includes(message.target.roomid);
 }
@@ -83,7 +83,7 @@ function isCommand(message: string): message is Command {
 
 // isCommand('ttp');
 
-export function toCmd(message: Message): Command | false {
+export function toCmd(message: Message<'chat' | 'pm'>): Command | false {
     // a cmd is a message that starts with the prefix and the cmd, followed by a space or the end of the message. or either but with /botmsg before the prefix
     // return message.content.startsWith(config.prefix + cmd + ' ') || message.content === config.prefix + cmd || message.content.startsWith('/botmsg ' + config.prefix + cmd + ' ') || message.content === '/botmsg ' + config.prefix + cmd;
     let command = message.content;

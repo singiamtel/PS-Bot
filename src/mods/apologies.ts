@@ -8,7 +8,7 @@ const apologies = ['sorry', 'apologize', 'apologies', 'apologise', 'apology', 's
 const antiApologies = ['not sorry', 'not apologize', 'not apologies', 'not apologise', 'not apology', 'not sry', 'sorry but', 'sry but', 'won\'t apologise'];
 
 
-export function apologyCounter(message: Message, username: string) {
+export function apologyCounter(message: Message<'chat' | 'pm'>, username: string) {
     if (apologies.some(word => message.content.toLowerCase().includes(word))) {
         if (antiApologies.some(word => message.content.toLowerCase().includes(word))) return;
         if (message.content.startsWith(config.prefix)) return;
@@ -29,7 +29,7 @@ export function apologyCounter(message: Message, username: string) {
     }
 }
 
-export function showApologiesLeaderboard(message : Message) {
+export function showApologiesLeaderboard(message : Message<'chat' | 'pm'>) {
     db.all('SELECT * FROM apologies ORDER BY points DESC LIMIT 5', (err, rows:any) => {
         if (err) return logger.error({ cmd: 'apologyshow', message: 'Error getting from db', error: err });
         const htmlTable = `<table><tr><th>Name</th><th>Apologies</th></tr>${rows.map((row:any) => `<tr><td>${row.name}</td><td>${row.points}</td></tr>`).join('')}</table>`;
@@ -37,7 +37,7 @@ export function showApologiesLeaderboard(message : Message) {
     });
 }
 
-export function showApologiesRank(message : Message) {
+export function showApologiesRank(message : Message<'chat' | 'pm'>) {
     // Allow spaces in usernames
     const displayname = message.content.split(' ').slice(1).join(' ');
     const user = toID(displayname);

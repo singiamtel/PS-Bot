@@ -5,11 +5,11 @@ import Room from 'ps-client/classes/room.js';
 import { toID } from 'ps-client/tools.js';
 import { config } from '../config.js';
 
-function canUHTML(message: Message, username: string | undefined) {
+function canUHTML(message: Message<'chat' | 'pm'>, username: string | null | undefined) {
     return message.type === 'chat' && message.target instanceof Room && username && message.target.auth && message.target.auth['*']?.includes(toID(config.name));
 }
 
-export function nameColour(message: Message, username: string | undefined) {
+export function nameColour(message: Message<'chat' | 'pm'>, username: string | null | undefined) {
     const displayname = toID(message.content.split(' ').slice(1).join(' '));
     const nameColour = determineColour(displayname);
     const colour = namer(nameColour).ntc[0];
@@ -20,7 +20,7 @@ export function nameColour(message: Message, username: string | undefined) {
     } else { return message.reply(`I think that's ${colour.name} (#${colour.hex})`); }
 }
 
-export function compareColours(message: Message, username: string | undefined) {
+export function compareColours(message: Message<'chat' | 'pm'>, username: string | null | undefined) {
     const [name1, name2] = message.content.split(' ').slice(1).join(' ').split(',');
     const colour1 = determineColour(toID(name1));
     const colour2 = determineColour(toID(name2));

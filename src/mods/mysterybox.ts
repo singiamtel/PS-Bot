@@ -11,17 +11,17 @@ import { logger } from '../logger.js';
 const legalDifficulties = ['easy', 'medium', 'hard'];
 const hostRoom = config.hostRoom;
 
-export function MBtestAuth(message: Message) {
+export function MBtestAuth(message: Message<'chat' | 'pm'>) {
     return roomAtLeast('%', message, hostRoom) ? reply(message, `You are auth in ${hostRoom}.`) : reply(message, `You are not auth in ${hostRoom}.`);
 }
 
-export function MBendQuestion(message: Message) {
+export function MBendQuestion(message: Message<'chat' | 'pm'>) {
     if (!isQuestionOngoing()) return message.reply('There is no ongoing question.');
     endQuestion();
     message.reply('The question has been ended.');
 }
 
-export function MBdeclareQuestion(message: Message) {
+export function MBdeclareQuestion(message: Message<'chat' | 'pm'>) {
     const room = client.rooms.get(hostRoom);
     const question = getQuestion();
     if (!room) {
@@ -32,7 +32,7 @@ export function MBdeclareQuestion(message: Message) {
     room.send(`!rfaq mysterybox`);
 }
 
-export function MBcreateQuestion(message: Message) {
+export function MBcreateQuestion(message: Message<'chat' | 'pm'>) {
     if (isQuestionOngoing()) return reply(message, `There is already an ongoing question. Please finish it with ${config.prefix}endquestion first.`);
     const text = message.content;
     const [_difficulty, ...newAnswertmp] = text.split(' ').slice(1).join(' ').split(',');
@@ -44,7 +44,7 @@ export function MBcreateQuestion(message: Message) {
 }
 
 const botMsg = /^\/botmsg /i;
-export function MBanswerQuestion(message: Message) {
+export function MBanswerQuestion(message: Message<'chat' | 'pm'>) {
     const text = message.content;
     logger.info({ cmd: 'mysteryboxAnswer', message: 'Answering question', content: text });
     const question = getQuestion();
@@ -97,14 +97,14 @@ export function MBanswerQuestion(message: Message) {
 
 const answerBox = `<center><div style="padding: 10px; border-radius:15px;background-color: #ffeac9 ; color: #85071c; width:500px; border: 1px solid #85071c">  <h1>Enter your guess!</h1> <form data-submitsend="/msgroom ${config.hostRoom},/botmsg ${config.name}, ${config.prefix}answer {answer}"><input autofocus style="width: 400px; margin: 0 auto" autocomplete="off" name="answer" placeholder="Your guess goes here" style="width:60%;"><button style="display:block;margin: 10px;padding: 2px" class="button">Submit</button></form></div></center>`;
 
-function refreshAnswerBox(message: Message, user: string | null) {
+function refreshAnswerBox(message: Message<'chat' | 'pm'>, user: string | null) {
     if (user) {
         return message.reply(`/msgroom ${config.hostRoom},/sendprivateuhtml ${user},answerbox, ${answerBox}`);
     }
     message.reply(`/msgroom ${config.hostRoom},/adduhtml answerbox, ${answerBox}`);
 }
 
-export function MBshowAnswerBox(message: Message) {
+export function MBshowAnswerBox(message: Message<'chat' | 'pm'>) {
     const isBotMsg = botMsg.test(message.content);
     if (isBotMsg) {
         return refreshAnswerBox(message, message.author.id);
@@ -145,7 +145,7 @@ function addPointsToUser(user: string, points: number, cb: () => void) {
     });
 }
 
-export function MBaddPoints(message: Message) {
+export function MBaddPoints(message: Message<'chat' | 'pm'>) {
     const text = message.content;
     const args = text.split(' ').slice(1);
     const [name, _points] = args.join(' ').split(',');
@@ -173,7 +173,7 @@ export function leaderboard(cb: (leaderboard: string) => void, { limit = 10, htm
 }
 
 
-export function MBleaderboard(message: Message) {
+export function MBleaderboard(message: Message<'chat' | 'pm'>) {
     const isBotMsg = botMsg.test(message.content);
     if (isBotMsg) {
         leaderboard(htmlTable => {
@@ -197,7 +197,7 @@ export function MBleaderboard(message: Message) {
     }
 }
 
-export function MBrank(message: Message) {
+export function MBrank(message: Message<'chat' | 'pm'>) {
     if (isRoom(message.target) && !inAllowedRooms(message, [hostRoom])) {
         return;
     }
