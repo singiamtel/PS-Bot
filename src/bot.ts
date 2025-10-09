@@ -67,7 +67,7 @@ export function reply(message: Message<'chat' | 'pm'>, content: string, { inPm =
 }
 
 export function privateHTML(message: Message<'chat' | 'pm'>, content: string, room: string) {
-    if (!isRoom) return message.author.send(content);
+    if (!isRoom(message.target)) return message.author.send(content);
     return message.reply(`/msgroom ${room},/sendprivatehtmlbox  ${message.author.id}, ${content}`);
 }
 

@@ -28,8 +28,8 @@ export function isRoom(target: User | Room): target is Room {
 }
 
 export function inAllowedRooms(message: Message<'chat' | 'pm'>, rooms: string[]) {
-    rooms.push('botdevelopment'); // Allow bot development
-    return isRoom(message.target) && rooms.includes(message.target.roomid);
+    const allowedRooms = [...rooms, 'botdevelopment']; // Allow bot development
+    return isRoom(message.target) && allowedRooms.includes(message.target.roomid);
 }
 
 export function toOrdinal(num: number) {
