@@ -1,0 +1,37 @@
+name: Showdown Connection Smoke Test
+
+on:
+  workflow_dispatch: # Allow manual trigger
+  schedule:
+    # Run every day at 2am UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke test
+        env:
+          botusername: ${{ secrets.SHOWDOWN_USERNAME }}
+          botpassword: ${{ secrets.SHOWDOWN_PASSWORD }}
+        run: npx tsx .github/scripts/smoke-test.ts
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Showdown connection smoke test failed!"
+          echo "Please check the logs above for details."
