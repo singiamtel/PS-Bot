@@ -41,19 +41,19 @@ describe('formatDate', () => {
 
 describe('isRoom', () => {
     it('should return true for Room instances', () => {
-        const room = new Room('test');
+        const room = new Room('test', {} as any);
         expect(isRoom(room)).toBe(true);
     });
 
     it('should return false for User instances', () => {
-        const user = new User({ id: 'testuser' });
+        const user = new User({ id: 'testuser' }, {} as any);
         expect(isRoom(user)).toBe(false);
     });
 });
 
 describe('inAllowedRooms', () => {
     it('should return true if message is in allowed room', () => {
-        const room = new Room('testroom');
+        const room = new Room('testroom', {} as any);
         const message = {
             target: room,
         } as Message<'chat' | 'pm'>;
@@ -62,7 +62,7 @@ describe('inAllowedRooms', () => {
     });
 
     it('should return true for botdevelopment room even if not in list', () => {
-        const room = new Room('botdevelopment');
+        const room = new Room('botdevelopment', {} as any);
         const message = {
             target: room,
         } as Message<'chat' | 'pm'>;
@@ -71,16 +71,16 @@ describe('inAllowedRooms', () => {
     });
 
     it('should return false if message is not in a room', () => {
-        const user = new User({ id: 'testuser' });
+        const user = new User({ id: 'testuser' }, {} as any);
         const message = {
             target: user,
-        } as Message<'chat' | 'pm'>;
+        } as unknown as Message<'chat' | 'pm'>;
 
         expect(inAllowedRooms(message, ['testroom'])).toBe(false);
     });
 
     it('should return false if room is not in allowed list', () => {
-        const room = new Room('otherroom');
+        const room = new Room('otherroom', {} as any);
         const message = {
             target: room,
         } as Message<'chat' | 'pm'>;

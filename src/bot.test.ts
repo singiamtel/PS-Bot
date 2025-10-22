@@ -102,7 +102,7 @@ describe('roomAtLeast', () => {
         };
 
         vi.doMock('./bot.js', async (importOriginal) => {
-            const actual = await importOriginal();
+            const actual: any = await importOriginal();
             return {
                 ...actual,
                 default: mockClient,
@@ -168,7 +168,7 @@ describe('privateHTML', () => {
     it('should send PM if not in a room', () => {
         const sendMock = vi.fn();
         const replyMock = vi.fn();
-        const user = new User({ id: 'testuser' });
+        const user = new User({ id: 'testuser' }, {} as any);
 
         const message = {
             target: user,
@@ -185,7 +185,7 @@ describe('privateHTML', () => {
     it('should use msgroom command when in a room', () => {
         const sendMock = vi.fn();
         const replyMock = vi.fn();
-        const room = new Room('testroom');
+        const room = new Room('testroom', {} as any);
 
         const message = {
             target: room,

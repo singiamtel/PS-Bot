@@ -33,7 +33,7 @@ describe('answerToCustoms', () => {
     });
 
     const createMessage = (content: string, roomid: string): Message<'chat' | 'pm'> => {
-        const room = new Room(roomid);
+        const room = new Room(roomid, {} as any);
         return {
             content,
             target: room,
