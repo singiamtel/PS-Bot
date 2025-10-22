@@ -12,7 +12,7 @@ let customs: { [key: string]: string } = {};
 try {
     const data = fs.readFileSync(customsPath, 'utf8');
     customs = JSON.parse(data);
-} catch (err) {
+} catch {
     logger.verbose({ cmd: 'customs', message: 'No customs.json file found. Creating one in', path: customsPath });
     fs.writeFileSync(customsPath, JSON.stringify(customs, null, 2), 'utf8');
 }

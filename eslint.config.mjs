@@ -29,7 +29,7 @@ export default [
             
             // Your custom stylistic rules
             '@stylistic/quotes': ['error', 'single', {
-                allowTemplateLiterals: true,
+                allowTemplateLiterals: "always",
             }],
 
             'space-in-parens': ['error', 'never'],

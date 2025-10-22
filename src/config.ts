@@ -15,7 +15,7 @@ const configPath = path.join(rootDir, '../config.json');
 try {
     const data = fs.readFileSync(configPath, 'utf8');
     __config = JSON.parse(data);
-} catch (err) {
+} catch {
     fs.writeFileSync(configPath, JSON.stringify(__config, null, 2), 'utf8');
 }
 

@@ -17,7 +17,7 @@ const client = new Client({
     username,
     password,
     avatar: 'supernerd',
-    rooms: []
+    rooms: [],
 });
 
 // Set a timeout for the connection attempt
