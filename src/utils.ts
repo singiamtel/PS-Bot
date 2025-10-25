@@ -73,6 +73,9 @@ export const commands = [
     'addpc',
     'pc',
     'pcall',
+    'addhighlight', 'highlight',
+    'removehighlight', 'delhighlight',
+    'listhighlight', 'highlights',
 ] as const;
 
 export type Command = typeof commands[number];
