@@ -32,9 +32,9 @@ export function checkHighlights(message: Message<'chat' | 'pm'>, authorUsername:
             const wordRegex = new RegExp(`\\b${escapeRegex(highlight.word)}\\b`, 'i');
             if (wordRegex.test(content)) {
                 // Send Discord notification
-                const roomInfo = message.target instanceof Object && 'roomid' in message.target
-                    ? `room: ${message.target.roomid}`
-                    : 'PM';
+                const roomInfo = message.target instanceof Object && 'roomid' in message.target ?
+                    `room: ${message.target.roomid}` :
+                    'PM';
 
                 hook.send(`<@${highlight.discord_id}> Your highlight word "${highlight.word}" was mentioned by ${message.author?.name} in ${roomInfo}: "${message.content}"`);
 
@@ -43,7 +43,7 @@ export function checkHighlights(message: Message<'chat' | 'pm'>, authorUsername:
                     user: highlight.user,
                     word: highlight.word,
                     author: message.author?.name,
-                    content: message.content
+                    content: message.content,
                 });
             }
         }
@@ -131,7 +131,7 @@ export function removeHighlight(message: Message<'chat' | 'pm'>) {
     db.run(
         'DELETE FROM word_highlights WHERE user = ? AND word = ?',
         [username, word],
-        function(this: { changes: number }, err: Error | null) {
+        function (this: { changes: number }, err: Error | null) {
             if (err) {
                 logger.error({ cmd: 'removeHighlight', error: err.message });
                 reply(message, 'Error removing highlight.');
