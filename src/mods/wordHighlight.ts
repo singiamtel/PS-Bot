@@ -37,7 +37,7 @@ export function checkHighlights(message: Message<'chat' | 'pm'>, authorUsername:
                     `room: ${message.target.roomid}` :
                     'PM';
 
-                hook.send(`<@${highlight.discord_id}> Your highlight word "${highlight.word}" was mentioned by ${message.author?.name} in ${roomInfo}: "${message.content}"`);
+                hook.send(`<@&${highlight.discord_id}> Your highlight word "${highlight.word}" was mentioned by ${message.author?.name} in ${roomInfo}: "${message.content}"`);
 
                 logger.info({
                     cmd: 'wordHighlight',
