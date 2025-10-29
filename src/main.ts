@@ -13,6 +13,7 @@ import { hook } from './hook.js';
 import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBcreateQuestion, MBshowAnswerBox, MBtestAuth, leaderboard, MBendQuestion, MBdeclareQuestion } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
 import { assertNever, isRoom, toCmd } from './utils.js';
+import { addHighlight, checkHighlights, listHighlights, removeHighlight } from './mods/wordHighlight.js';
 
 import express from 'express';
 import morgan from 'morgan';
@@ -29,6 +30,7 @@ client.on('message', (message) => {
     logger.verbose({ cmd: 'chat', message: message.content, username, target });
     saveChat(message, username);
     apologyCounter(message, username);
+    checkHighlights(message, username);
 
     // Not voice
     if (message.msgRank !== ' ' && message.msgRank !== undefined) {
@@ -38,7 +40,6 @@ client.on('message', (message) => {
     const cmd = toCmd(message);
     if (!cmd) return;
     // const hasPerms = getAuth(message) || isRoomAuth || config.whitelist.includes(username)
-    console.log('cmd', cmd);
 
     switch (cmd) {
         // 'namecolour', 'namecolor',
@@ -173,6 +174,24 @@ client.on('message', (message) => {
         case 'pcall':
             if (!config.whitelist.includes(username)) return;
             showCombinedPoliticalCompass(message);
+            break;
+
+        case 'addhighlight':
+        case 'highlight':
+            if (!config.whitelist.includes(username)) return;
+            addHighlight(message);
+            break;
+
+        case 'removehighlight':
+        case 'delhighlight':
+            if (!config.whitelist.includes(username)) return;
+            removeHighlight(message);
+            break;
+
+        case 'listhighlight':
+        case 'highlights':
+            if (!config.whitelist.includes(username)) return;
+            listHighlights(message);
             break;
 
         default:

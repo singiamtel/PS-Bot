@@ -26,4 +26,5 @@ export const config = {
     hostRoom: __config.hostRoom ?? 'botdevelopment',
     imageCDN: __config.imageCDN ?? 'https://cdn.crob.at/',
     name: process.env.botusername,
+    discordId: process.env.discord_id,
 };
