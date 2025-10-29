@@ -40,7 +40,6 @@ client.on('message', (message) => {
     const cmd = toCmd(message);
     if (!cmd) return;
     // const hasPerms = getAuth(message) || isRoomAuth || config.whitelist.includes(username)
-    console.log('cmd', cmd);
 
     switch (cmd) {
         // 'namecolour', 'namecolor',
