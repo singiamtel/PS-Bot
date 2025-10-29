@@ -28,10 +28,10 @@ vi.mock('ps-client', async () => {
     const actual = await vi.importActual<typeof import('ps-client')>('ps-client');
     return {
         ...actual,
-        Client: vi.fn().mockImplementation(() => ({
-            connect: vi.fn(),
-            getRoom: vi.fn(),
-        })),
+        Client: class {
+            connect = vi.fn();
+            getRoom = vi.fn();
+        },
     };
 });
 
