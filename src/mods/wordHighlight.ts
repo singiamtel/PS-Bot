@@ -4,6 +4,7 @@ import { reply } from '../bot.js';
 import { hook } from '../hook.js';
 import { logger } from '../logger.js';
 import { toID } from 'ps-client/tools.js';
+import { config } from '../config.js';
 
 interface Highlight {
     user: string;
@@ -54,25 +55,26 @@ export function checkHighlights(message: Message<'chat' | 'pm'>, authorUsername:
  * Add a word to highlight for the current user
  */
 export function addHighlight(message: Message<'chat' | 'pm'>) {
-    // Parse command: #addhighlight <discord_id> <word>
+    // Parse command: #addhighlight <word>
     const parts = message.content.split(' ');
 
-    if (parts.length < 3) {
-        reply(message, 'Usage: addhighlight <discord_id> <word>. Example: addhighlight 123456789 pizza');
+    if (parts.length < 2) {
+        reply(message, 'Usage: addhighlight <word>. Example: addhighlight pizza');
         return;
     }
 
-    const discordId = parts[1];
-    const word = parts.slice(2).join(' ').toLowerCase().trim();
-
-    // Validate Discord ID format (should be numeric)
-    if (!/^\d+$/.test(discordId)) {
-        reply(message, 'Invalid Discord ID. It should be a numeric value.');
-        return;
-    }
+    const word = parts.slice(1).join(' ').toLowerCase().trim();
 
     if (!word || word.length < 2) {
         reply(message, 'Word must be at least 2 characters long.');
+        return;
+    }
+
+    // Get Discord ID from environment variable
+    const discordId = config.discordId;
+    if (!discordId) {
+        reply(message, 'Discord ID not configured. Please set discord_id environment variable.');
+        logger.error({ cmd: 'addHighlight', error: 'discord_id not configured' });
         return;
     }
 

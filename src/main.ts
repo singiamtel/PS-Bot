@@ -179,16 +179,19 @@ client.on('message', (message) => {
 
         case 'addhighlight':
         case 'highlight':
+            if (!config.whitelist.includes(username)) return;
             addHighlight(message);
             break;
 
         case 'removehighlight':
         case 'delhighlight':
+            if (!config.whitelist.includes(username)) return;
             removeHighlight(message);
             break;
 
         case 'listhighlight':
         case 'highlights':
+            if (!config.whitelist.includes(username)) return;
             listHighlights(message);
             break;
 
