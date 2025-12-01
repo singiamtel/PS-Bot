@@ -76,6 +76,7 @@ export const commands = [
     'addhighlight', 'highlight',
     'removehighlight', 'delhighlight',
     'listhighlight', 'highlights',
+    'help',
 ] as const;
 
 export type Command = typeof commands[number];

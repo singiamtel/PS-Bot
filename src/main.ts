@@ -14,6 +14,7 @@ import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBc
 import { toID } from 'ps-client/tools.js';
 import { assertNever, isRoom, toCmd } from './utils.js';
 import { addHighlight, checkHighlights, listHighlights, removeHighlight } from './mods/wordHighlight.js';
+import { helpCommand } from './mods/help.js';
 
 import express from 'express';
 import morgan from 'morgan';
@@ -192,6 +193,10 @@ client.on('message', (message) => {
         case 'highlights':
             if (!config.whitelist.includes(username)) return;
             listHighlights(message);
+            break;
+
+        case 'help':
+            helpCommand(message);
             break;
 
         default:
