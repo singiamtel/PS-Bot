@@ -8,7 +8,7 @@
     "morgan": "^1.10.1",
     "ps-client": "^5.2.0",
     "sqlite3": "^5.1.7",
-    "typescript-eslint": "^8.47.0",
+    "typescript-eslint": "^8.48.0",
     "winston": "^3.18.3"
   },
   "devDependencies": {
@@ -18,9 +18,9 @@
     "@types/express": "~5.0.5",
     "@types/morgan": "~1.9.10",
     "@types/node": "^24.10.1",
-    "@vitest/ui": "^4.0.13",
+    "@vitest/ui": "^4.0.14",
     "globals": "^16.5.0",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.5"
   },
