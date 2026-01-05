@@ -8,7 +8,7 @@
     "morgan": "^1.10.1",
     "ps-client": "^5.2.0",
     "sqlite3": "^5.1.7",
-    "typescript-eslint": "^8.49.0",
+    "typescript-eslint": "^8.51.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {
@@ -17,9 +17,9 @@
     "@types/color-namer": "~1.3.3",
     "@types/express": "~5.0.6",
     "@types/morgan": "~1.9.10",
-    "@types/node": "^25.0.2",
-    "@vitest/ui": "^4.0.15",
-    "globals": "^16.5.0",
+    "@types/node": "^25.0.3",
+    "@vitest/ui": "^4.0.16",
+    "globals": "^17.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.5"
