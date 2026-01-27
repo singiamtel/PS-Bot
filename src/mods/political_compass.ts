@@ -13,20 +13,19 @@ export function politicalCompass(message: Message<'chat' | 'pm'>, username: stri
     // find the user in the database
     const user = message.content.split(' ').slice(1).join(' ');
     const cleanUsername = toID(user);
-    db.get('SELECT * FROM pc WHERE name = ?', [cleanUsername], (err, row) => {
-        if (err) {
-            logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', user, error: err });
-            return;
-        }
+    try {
+        const row = db.prepare('SELECT * FROM pc WHERE name = ?').get(cleanUsername) as Record<string, unknown> | undefined;
         if (!row) {
             message.reply(user + 'has not added their political compass yet!');
         } else {
             // https://www.politicalcompass.org/analysis2?ec=-11&soc=-4.36
-            const econ = (row as any).economic;
-            const soc = (row as any).social;
+            const econ = row.economic;
+            const soc = row.social;
             message.reply(`${user} political compass is ${econ}, ${soc}. https://www.politicalcompass.org/analysis2?ec=${econ}&soc=${soc}`);
         }
-    });
+    } catch (err) {
+        logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', user, error: err });
+    }
 }
 
 export function addPoliticalCompass(message: Message<'chat' | 'pm'>) {
@@ -51,32 +50,21 @@ export function addPoliticalCompass(message: Message<'chat' | 'pm'>) {
         message.reply('That is not a valid political compass URL!');
         return;
     }
-    // find the user in the database
-    db.get('SELECT * FROM pc WHERE name = ?', [user], (err, row) => {
-        if (err) {
-            logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', user, error: err });
-            return;
-        }
+    try {
+        // find the user in the database
+        const row = db.prepare('SELECT * FROM pc WHERE name = ?').get(user) as Record<string, unknown> | undefined;
         if (row === undefined) {
             // add the user to the database
-            db.run('INSERT INTO pc (name, economic, social) VALUES (?, ?, ?)', [user, ec, soc], (err) => {
-                if (err) {
-                    logger.error({ cmd: 'politicalCompass', message: 'Error inserting into db', user, error: err });
-                    return;
-                }
-                message.reply('Political compass has been added!');
-            });
+            db.prepare('INSERT INTO pc (name, economic, social) VALUES (?, ?, ?)').run(user, ec, soc);
+            message.reply('Political compass has been added!');
         } else {
             // update the user's political compass
-            db.run('UPDATE pc SET economic = ?, social = ? WHERE name = ?', [ec, soc, user], (err) => {
-                if (err) {
-                    logger.error({ cmd: 'politicalCompass', message: 'Error updating points', user, error: err });
-                    return;
-                }
-                message.reply('Political compass has been updated!');
-            });
+            db.prepare('UPDATE pc SET economic = ?, social = ? WHERE name = ?').run(ec, soc, user);
+            message.reply('Political compass has been updated!');
         }
-    });
+    } catch (err) {
+        logger.error({ cmd: 'politicalCompass', message: 'Error in political compass db operation', user, error: err });
+    }
 }
 
 export function showCombinedPoliticalCompass(message: Message<'chat' | 'pm'>) {
@@ -91,13 +79,10 @@ export function showCombinedPoliticalCompass(message: Message<'chat' | 'pm'>) {
     // remove the user's first character and usernameify it
         onlineUsers[index] = toID(user.slice(1));
     });
-    // find all users in the database
-    db.all('SELECT * FROM pc', [], (err, rows) => {
-        if (err) {
-            logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', error: err });
-            return;
-        }
-        if (rows === undefined) {
+    try {
+        // find all users in the database
+        const rows = db.prepare('SELECT * FROM pc').all() as unknown as Record<string, unknown>[];
+        if (rows === undefined || rows.length === 0) {
             message.reply('No users have added their political compass yet!');
         } else {
             // https://www.politicalcompass.org/crowdchart2?spots=10%7C10%7Ceight8x6,1%7C1%7Cjuan
@@ -106,11 +91,11 @@ export function showCombinedPoliticalCompass(message: Message<'chat' | 'pm'>) {
             let any = false;
             for (const row of rows) {
                 // check if the user is online
-                if (!onlineUsers.includes(toID((row as any).name))) {
+                if (!onlineUsers.includes(toID(row.name as string))) {
                     continue;
                 }
                 any = true;
-                reply += `${(row as any).economic}%7C${(row as any).social}%7C${(row as any).name},`;
+                reply += `${row.economic}%7C${row.social}%7C${row.name},`;
             }
             if (!any) {
                 message.reply('No online users have added their political compass yet!');
@@ -119,5 +104,7 @@ export function showCombinedPoliticalCompass(message: Message<'chat' | 'pm'>) {
             reply = reply.slice(0, -1); // remove the last comma
             message.reply(`${base_url}${reply}`);
         }
-    });
+    } catch (err) {
+        logger.error({ cmd: 'politicalCompass', message: 'Error getting from db', error: err });
+    }
 }

@@ -18,12 +18,8 @@ interface Highlight {
 export function checkHighlights(message: Message<'chat' | 'pm'>, authorUsername: string) {
     const content = message.content.toLowerCase();
 
-    // Get all highlights from database
-    db.all('SELECT user, discord_id, word FROM word_highlights', (err: Error | null, rows: Highlight[]) => {
-        if (err) {
-            logger.error({ cmd: 'checkHighlights', error: err.message });
-            return;
-        }
+    try {
+        const rows = db.prepare('SELECT user, discord_id, word FROM word_highlights').all() as unknown as Highlight[];
 
         for (const highlight of rows) {
             // Don't highlight user's own messages
@@ -48,7 +44,9 @@ export function checkHighlights(message: Message<'chat' | 'pm'>, authorUsername:
                 });
             }
         }
-    });
+    } catch (err) {
+        logger.error({ cmd: 'checkHighlights', error: (err as Error).message });
+    }
 }
 
 /**
@@ -80,39 +78,23 @@ export function addHighlight(message: Message<'chat' | 'pm'>) {
 
     const username = toID(message.author?.name);
 
-    // Check if highlight already exists
-    db.get(
-        'SELECT * FROM word_highlights WHERE user = ? AND word = ?',
-        [username, word],
-        (err: Error | null, row: Highlight | undefined) => {
-            if (err) {
-                logger.error({ cmd: 'addHighlight', error: err.message });
-                reply(message, 'Error adding highlight.');
-                return;
-            }
+    try {
+        // Check if highlight already exists
+        const row = db.prepare('SELECT * FROM word_highlights WHERE user = ? AND word = ?').get(username, word) as Highlight | undefined;
 
-            if (row) {
-                reply(message, `You already have a highlight for "${word}".`);
-                return;
-            }
-
-            // Add the highlight
-            db.run(
-                'INSERT INTO word_highlights (user, discord_id, word) VALUES (?, ?, ?)',
-                [username, discordId, word],
-                (err: Error | null) => {
-                    if (err) {
-                        logger.error({ cmd: 'addHighlight', error: err.message });
-                        reply(message, 'Error adding highlight.');
-                        return;
-                    }
-
-                    reply(message, `Added highlight for "${word}". You'll be pinged on Discord when it's mentioned.`);
-                    logger.info({ cmd: 'addHighlight', user: username, discord_id: discordId, word });
-                }
-            );
+        if (row) {
+            reply(message, `You already have a highlight for "${word}".`);
+            return;
         }
-    );
+
+        // Add the highlight
+        db.prepare('INSERT INTO word_highlights (user, discord_id, word) VALUES (?, ?, ?)').run(username, discordId, word);
+        reply(message, `Added highlight for "${word}". You'll be pinged on Discord when it's mentioned.`);
+        logger.info({ cmd: 'addHighlight', user: username, discord_id: discordId, word });
+    } catch (err) {
+        logger.error({ cmd: 'addHighlight', error: (err as Error).message });
+        reply(message, 'Error adding highlight.');
+    }
 }
 
 /**
@@ -130,25 +112,20 @@ export function removeHighlight(message: Message<'chat' | 'pm'>) {
     const word = parts.slice(1).join(' ').toLowerCase().trim();
     const username = toID(message.author?.name);
 
-    db.run(
-        'DELETE FROM word_highlights WHERE user = ? AND word = ?',
-        [username, word],
-        function (this: { changes: number }, err: Error | null) {
-            if (err) {
-                logger.error({ cmd: 'removeHighlight', error: err.message });
-                reply(message, 'Error removing highlight.');
-                return;
-            }
+    try {
+        const result = db.prepare('DELETE FROM word_highlights WHERE user = ? AND word = ?').run(username, word);
 
-            if (this.changes === 0) {
-                reply(message, `You don't have a highlight for "${word}".`);
-                return;
-            }
-
-            reply(message, `Removed highlight for "${word}".`);
-            logger.info({ cmd: 'removeHighlight', user: username, word });
+        if (result.changes === 0) {
+            reply(message, `You don't have a highlight for "${word}".`);
+            return;
         }
-    );
+
+        reply(message, `Removed highlight for "${word}".`);
+        logger.info({ cmd: 'removeHighlight', user: username, word });
+    } catch (err) {
+        logger.error({ cmd: 'removeHighlight', error: (err as Error).message });
+        reply(message, 'Error removing highlight.');
+    }
 }
 
 /**
@@ -157,26 +134,21 @@ export function removeHighlight(message: Message<'chat' | 'pm'>) {
 export function listHighlights(message: Message<'chat' | 'pm'>) {
     const username = toID(message.author?.name);
 
-    db.all(
-        'SELECT word, discord_id FROM word_highlights WHERE user = ? ORDER BY word',
-        [username],
-        (err: Error | null, rows: Highlight[]) => {
-            if (err) {
-                logger.error({ cmd: 'listHighlights', error: err.message });
-                reply(message, 'Error fetching highlights.');
-                return;
-            }
+    try {
+        const rows = db.prepare('SELECT word, discord_id FROM word_highlights WHERE user = ? ORDER BY word').all(username) as unknown as Highlight[];
 
-            if (rows.length === 0) {
-                reply(message, 'You have no highlights set.');
-                return;
-            }
-
-            const wordList = rows.map(r => r.word).join(', ');
-            const discordId = rows[0].discord_id;
-            reply(message, `Your highlights (pinging <@${discordId}>): ${wordList}`);
+        if (rows.length === 0) {
+            reply(message, 'You have no highlights set.');
+            return;
         }
-    );
+
+        const wordList = rows.map(r => r.word).join(', ');
+        const discordId = rows[0].discord_id;
+        reply(message, `Your highlights (pinging <@${discordId}>): ${wordList}`);
+    } catch (err) {
+        logger.error({ cmd: 'listHighlights', error: (err as Error).message });
+        reply(message, 'Error fetching highlights.');
+    }
 }
 
 /**
