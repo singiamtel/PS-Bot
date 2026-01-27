@@ -66,7 +66,7 @@ export function MBanswerQuestion(message: Message<'chat' | 'pm'>) {
     if (answer === attempt.toLowerCase().trim()) {
         const points = difficulty === 'easy' ? 2 : difficulty === 'medium' ? winners.length <= 3 ? 6 - winners.length : 3 : winners.length <= 5 ? 9 - winners.length : 4;
         addWinner(message.author.id);
-        addPointsToUser(message.author.id, points, () => { });
+        addPointsToUser(message.author.id, points);
         const msgContent = `Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`;
         if (answerInRoom) {
             privateHTML(message, msgContent, hostRoom);
@@ -121,28 +121,17 @@ export function MBshowAnswerBox(message: Message<'chat' | 'pm'>) {
     refreshAnswerBox(message, null);
 }
 
-function addPointsToUser(user: string, points: number, cb: () => void) {
-    db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-        if (err) return logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error getting from db', user, points, error: err });
+function addPointsToUser(user: string, points: number) {
+    try {
+        const rows = db.prepare('SELECT * FROM mysterybox WHERE name = ?').all(user) as unknown as Record<string, unknown>[];
         if (!rows || rows.length === 0) {
-            const query = `INSERT INTO mysterybox(name, points) VALUES(? , ?)`;
-            db.run(query, [user, points], err => {
-                if (err) {
-                    logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error inserting into db', user, points, error: err });
-                    return;
-                }
-                cb();
-            });
+            db.prepare('INSERT INTO mysterybox(name, points) VALUES(?, ?)').run(user, points);
         } else {
-            db.run(`UPDATE mysterybox SET points = ? WHERE name = ?`, [points + rows[0].points, user], err => {
-                if (err) {
-                    logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error updating points', user, points, error: err });
-                    return;
-                }
-                cb();
-            });
+            db.prepare('UPDATE mysterybox SET points = ? WHERE name = ?').run(points + (rows[0].points as number), user);
         }
-    });
+    } catch (err) {
+        logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error in addPointsToUser', user, points, error: err });
+    }
 }
 
 export function MBaddPoints(message: Message<'chat' | 'pm'>) {
@@ -154,46 +143,47 @@ export function MBaddPoints(message: Message<'chat' | 'pm'>) {
     if (!name || !points) return message.reply('Please specify a user and points.');
     const user = toID(name);
     if (user === 'unknown') return message.reply('Please specify a user.');
-    addPointsToUser(user, points, () => message.reply(`Added ${points} points to ${name}.`));
+    addPointsToUser(user, points);
+    message.reply(`Added ${points} points to ${name}.`);
 }
 
 const leaderboardCache: { table: string, time: number } = { table: '', time: 0 };
-export function leaderboard(cb: (leaderboard: string) => void, { limit = 10, html = true } = {}) {
+export function leaderboard({ limit = 10, html = true } = {}): string {
     if (leaderboardCache.time + 5 * 1000 > Date.now()) { // 5 seconds
-        return cb(leaderboardCache.table);
+        return leaderboardCache.table;
     }
-    db.all('SELECT * FROM mysterybox ORDER BY points DESC LIMIT ' + limit, (err, rows: any) => {
-        if (err) return logger.error({ cmd: 'leaderboard', message: 'Error getting from db', error: err });
-        if (!html) { return cb(rows.map((row: any) => `${row.points === rows[0].points ? '👑 ' : ''}${row.name}: ${row.points}`).join('\n')); }
-        const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row: any) => `<tr><td style="border:1px solid; padding:3px">${row.points === rows[0].points ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
+    try {
+        const rows = db.prepare('SELECT * FROM mysterybox ORDER BY points DESC LIMIT ?').all(limit) as unknown as Record<string, unknown>[];
+        if (!html) { return rows.map((row) => `${row.points === rows[0].points ? '👑 ' : ''}${row.name}: ${row.points}`).join('\n'); }
+        const htmlTable = `<table style="border-collapse: collapse"><tr><th style="border:1px solid; padding:3px;">Name</th><th style="border:1px solid; padding:3px">Points</th></tr>${rows.map((row) => `<tr><td style="border:1px solid; padding:3px">${row.points === rows[0].points ? '👑 ' : ''}${row.name}</td><td style="border:1px solid; padding:3px">${row.points}</td></tr>`).join('')}</table>`;
         leaderboardCache.table = htmlTable;
         leaderboardCache.time = Date.now();
-        cb(htmlTable);
-    });
+        return htmlTable;
+    } catch (err) {
+        logger.error({ cmd: 'leaderboard', message: 'Error getting from db', error: err });
+        return '';
+    }
 }
 
 
 export function MBleaderboard(message: Message<'chat' | 'pm'>) {
     const isBotMsg = botMsg.test(message.content);
     if (isBotMsg) {
-        leaderboard(htmlTable => {
-            privateHTML(message, htmlTable, hostRoom);
-        });
+        const htmlTable = leaderboard();
+        privateHTML(message, htmlTable, hostRoom);
         return;
     }
     if (isRoom(message.target)) {
         if (!inAllowedRooms(message, [hostRoom]) || !atLeast('+', message)) {
             return;
         }
-        leaderboard(htmlTable => {
-            message.reply(`/adduhtml MBleaderboard, ${htmlTable}`);
-        });
+        const htmlTable = leaderboard();
+        message.reply(`/adduhtml MBleaderboard, ${htmlTable}`);
         return;
     }
     if (!isRoom(message.target) || atLeast('+', message)) {
-        return leaderboard(table => {
-            message.reply(`!code ${table}`);
-        }, { html: false });
+        const table = leaderboard({ html: false });
+        return message.reply(`!code ${table}`);
     }
 }
 
@@ -205,8 +195,8 @@ export function MBrank(message: Message<'chat' | 'pm'>) {
     const displayname = message.content.replace(botMsg, '').split(' ').slice(1).join(' ') || message.author.name;
     const user = toID(displayname);
     if (user === 'unknown') return message.reply('Please specify a user.');
-    db.all('SELECT * FROM mysterybox WHERE name = ?', [user], (err, rows: any) => {
-        if (err) return logger.error({ cmd: 'mysteryboxRank', message: 'Error getting from db', user, error: err });
+    try {
+        const rows = db.prepare('SELECT * FROM mysterybox WHERE name = ?').all(user) as unknown as Record<string, unknown>[];
         if (!rows || rows.length === 0) {
             if (!isRoom(message.target) || atLeast('+', message)) {
                 return isBotMsg ? privateHTML(message, `${displayname} has no points yet.`, hostRoom) : message.reply(`${displayname} has no points yet.`);
@@ -225,7 +215,9 @@ export function MBrank(message: Message<'chat' | 'pm'>) {
             // Pm the user
             return message.author.send(`You have ${points} points.`);
         }
-    });
+    } catch (err) {
+        logger.error({ cmd: 'mysteryboxRank', message: 'Error getting from db', user, error: err });
+    }
 }
 
 export function MBgetAnswers() {
