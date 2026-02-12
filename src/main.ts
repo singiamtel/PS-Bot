@@ -230,10 +230,8 @@ app.get('/', (_req, res) => {
     res.redirect('/mysterybox/leaderboard');
 });
 
-app.get('/mysterybox/leaderboard', async (_req, res) => {
-    const lb = await new Promise((resolve) => {
-        leaderboard(resolve, { limit: 1000 });
-    });
+app.get('/mysterybox/leaderboard', (_req, res) => {
+    const lb = leaderboard({ limit: 1000 });
     res.send(lb);
 });
 
