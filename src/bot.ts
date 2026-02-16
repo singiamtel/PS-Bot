@@ -45,7 +45,6 @@ export function roomAtLeast(minRank: Rank, message: Message<'chat' | 'pm'>, room
 
 export function atLeast(rank: Rank, message: Message<'chat' | 'pm'>, quiet = false) {
     if (config.whitelist.includes(toID(message.author.name))) return true; // whitelist
-    console.log('atLeast', message.msgRank, rank);
     if (message.msgRank === undefined) {
         return false;
     }

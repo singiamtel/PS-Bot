@@ -61,35 +61,28 @@ client.on('message', (message) => {
             break;
 
         case 'ttp':
-            console.log('ttp');
             if (!atLeast('+', message)) return;
-            console.log('ttp past filter');
             ttp(message, 1);
-            console.log('ttp');
             break;
 
         case 'ttp2':
             if (!atLeast('+', message)) return;
             ttp(message, 2);
-            console.log('ttp2');
             break;
 
         case 'randttp':
             if (!atLeast('+', message)) return;
             randttp(message, 1);
-            console.log('ttp2');
             break;
 
         case 'randttp2':
             if (!atLeast('+', message)) return;
             randttp(message, 2);
-            console.log('ttp2');
             break;
 
         case 'randopple':
             if (!atLeast('+', message)) return;
             randopple(message);
-            console.log('ttp2');
             break;
 
         case 'rank':

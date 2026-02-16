@@ -83,7 +83,6 @@ export function MBanswerQuestion(message: Message<'chat' | 'pm'>) {
         }
         return;
     } else {
-        console.log('text', text, 'answerInRoom', answerInRoom);
         if (answerInRoom) {
             refreshAnswerBox(message, message.author.id);
             privateHTML(message, 'Wrong answer, please try again.', hostRoom);
