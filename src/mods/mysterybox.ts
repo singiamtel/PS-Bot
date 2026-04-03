@@ -122,12 +122,7 @@ export function MBshowAnswerBox(message: Message<'chat' | 'pm'>) {
 
 function addPointsToUser(user: string, points: number) {
     try {
-        const rows = db.prepare('SELECT * FROM mysterybox WHERE name = ?').all(user) as unknown as Record<string, unknown>[];
-        if (!rows || rows.length === 0) {
-            db.prepare('INSERT INTO mysterybox(name, points) VALUES(?, ?)').run(user, points);
-        } else {
-            db.prepare('UPDATE mysterybox SET points = ? WHERE name = ?').run(points + (rows[0].points as number), user);
-        }
+        db.prepare('INSERT INTO mysterybox(name, points) VALUES(?, ?) ON CONFLICT(name) DO UPDATE SET points = points + excluded.points').run(user, points);
     } catch (err) {
         logger.error({ cmd: 'mysteryboxAddPoints', message: 'Error in addPointsToUser', user, points, error: err });
     }

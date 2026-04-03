@@ -13,12 +13,7 @@ export function apologyCounter(message: Message<'chat' | 'pm'>, username: string
         if (antiApologies.some(word => message.content.toLowerCase().includes(word))) return;
         if (message.content.startsWith(config.prefix)) return;
         try {
-            const row = db.prepare('SELECT * FROM apologies WHERE name = ?').get(username) as Record<string, unknown> | undefined;
-            if (!row) {
-                db.prepare('INSERT INTO apologies(name, points) VALUES(?, 1)').run(username);
-            } else {
-                db.prepare('UPDATE apologies SET points = ? WHERE name = ?').run((row.points as number) + 1, username);
-            }
+            db.prepare('INSERT INTO apologies(name, points) VALUES(?, 1) ON CONFLICT(name) DO UPDATE SET points = points + 1').run(username);
             logger.info({ cmd: 'apologyCounter', message: 'Apology received', username, content: message.content });
         } catch (err) {
             logger.error({ cmd: 'apologyCounter', message: 'Error in apology counter', username, content: message.content, error: err });
