@@ -10,3 +10,5 @@ winners*.txt
 difficulty.txt
 bot.log
 roomba_log.jsonl
+db.sqlite-shm
+db.sqlite-wal
