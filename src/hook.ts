@@ -38,9 +38,9 @@ class DiscordWebhook {
     }
 }
 
-const hook = discord_webhook
-    ? new DiscordWebhook(discord_webhook)
-    : { send: () => Promise.resolve(), setUsername: () => {} };
+const hook = discord_webhook ?
+    new DiscordWebhook(discord_webhook) :
+    { send: () => Promise.resolve(), setUsername: () => {} };
 
 hook.setUsername(username);
 
