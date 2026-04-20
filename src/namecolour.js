@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { toID } from 'ps-client/tools.js';
 
 // Author: Felucia
@@ -610,14 +609,14 @@ export let customColors = {
 
 export async function loadCustomColors() {
     try {
-        const res = await axios.get(
-            'https://play.pokemonshowdown.com/config/colors.json',
-            {
-                withCredentials: false,
-                timeout: 5000,
-            },
-        );
-        Object.assign(customColors, res.data);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch('https://play.pokemonshowdown.com/config/colors.json', {
+            signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        const data = await res.json();
+        Object.assign(customColors, data);
         loadedCustomColors = true;
     } catch (e) {
         console.error('Couldn\'t fetch custom colours: ' + e);
