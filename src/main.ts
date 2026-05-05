@@ -17,7 +17,6 @@ import { addHighlight, checkHighlights, listHighlights, removeHighlight } from '
 import { helpCommand } from './mods/help.js';
 
 import express from 'express';
-import morgan from 'morgan';
 import { logger } from './logger.js';
 import { saveChat } from './mods/saveChat.js';
 
@@ -216,8 +215,6 @@ client.on('login', () => {
 });
 
 const app = express();
-
-app.use(morgan('combined'));
 
 app.get('/', (_req, res) => {
     res.redirect('/mysterybox/leaderboard');
