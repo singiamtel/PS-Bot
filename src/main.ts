@@ -20,6 +20,9 @@ import express from 'express';
 import { logger } from './logger.js';
 import { saveChat } from './mods/saveChat.js';
 
+const pmBotCooldown = new Map<string, number>();
+const PM_BOT_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+
 client.on('message', (message) => {
     if (message.isIntro || message.author?.name === client.status.username || message.author?.name === undefined) return;
     const username = toID(message.author?.name);
@@ -38,7 +41,22 @@ client.on('message', (message) => {
     }
 
     const cmd = toCmd(message);
-    if (!cmd) return;
+    if (!cmd) {
+        if (!isRoom(message.target)) {
+            const now = Date.now();
+            for (const [user, time] of pmBotCooldown) {
+                if (now - time >= PM_BOT_COOLDOWN_MS) pmBotCooldown.delete(user);
+            }
+            const lastReply = pmBotCooldown.get(username) ?? 0;
+            if (now - lastReply >= PM_BOT_COOLDOWN_MS) {
+                pmBotCooldown.set(username, now);
+                message.author.send(
+                    `Hi, I'm a bot! My prefix is \`${config.prefix}\`. Try \`${config.prefix}help\` to see what I can do.`,
+                );
+            }
+        }
+        return;
+    }
     // const hasPerms = getAuth(message) || isRoomAuth || config.whitelist.includes(username)
 
     switch (cmd) {
