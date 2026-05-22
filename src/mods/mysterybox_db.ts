@@ -63,7 +63,7 @@ export function getQuestion() {
 // They can only answer 3 times per hour, so we need to keep track of that
 let cooldowns: {[k: string]: Date}[] = [];
 const cooldownTime = 60 * 60 * 1000; // 1 hour
-export function updateCooldowns() {
+function updateCooldowns() {
     cooldowns = cooldowns.filter(x => {
         const now = new Date();
         const keys = Object.keys(x);

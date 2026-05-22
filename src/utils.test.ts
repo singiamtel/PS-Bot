@@ -5,7 +5,6 @@ import {
     isRoom,
     inAllowedRooms,
     toOrdinal,
-    formatTop3,
     toCmd,
     assertNever,
 } from './utils.js';
@@ -100,29 +99,6 @@ describe('toOrdinal', () => {
         expect(toOrdinal(4)).toBe('4th');
         expect(toOrdinal(10)).toBe('10th');
         expect(toOrdinal(100)).toBe('100th');
-    });
-});
-
-describe('formatTop3', () => {
-    it('should return empty string for empty array', () => {
-        expect(formatTop3([])).toBe('');
-    });
-
-    it('should return single username for one user', () => {
-        expect(formatTop3(['user1'])).toBe('user1');
-    });
-
-    it('should join two users with "and"', () => {
-        expect(formatTop3(['user1', 'user2'])).toBe('user1 and user2');
-    });
-
-    it('should format three users correctly', () => {
-        expect(formatTop3(['user1', 'user2', 'user3'])).toBe('user1, user2, and user3');
-    });
-
-    it('should only take first 3 users even if more are provided', () => {
-        expect(formatTop3(['user1', 'user2', 'user3', 'user4', 'user5']))
-            .toBe('user1, user2, and user3');
     });
 });
 

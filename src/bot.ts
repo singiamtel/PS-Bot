@@ -1,5 +1,4 @@
 import { Client, type Message } from 'ps-client';
-import Room from 'ps-client/classes/room.js';
 import { toID } from 'ps-client/tools.js';
 import { logger } from './logger.js';
 import { config } from './config.js';

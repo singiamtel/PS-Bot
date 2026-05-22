@@ -136,7 +136,7 @@ export function MBaddPoints(message: Message<'chat' | 'pm'>) {
     if (isNaN(points)) return message.reply('Please specify a valid number of points.');
     if (!name || !points) return message.reply('Please specify a user and points.');
     const user = toID(name);
-    if (user === 'unknown') return message.reply('Please specify a user.');
+    if (!user) return message.reply('Please specify a user.');
     addPointsToUser(user, points);
     message.reply(`Added ${points} points to ${name}.`);
 }
@@ -188,7 +188,7 @@ export function MBrank(message: Message<'chat' | 'pm'>) {
     const isBotMsg = botMsg.test(message.content);
     const displayname = message.content.replace(botMsg, '').split(' ').slice(1).join(' ') || message.author.name;
     const user = toID(displayname);
-    if (user === 'unknown') return message.reply('Please specify a user.');
+    if (!user) return message.reply('Please specify a user.');
     try {
         const rows = db.prepare('SELECT * FROM mysterybox WHERE name = ?').all(user) as unknown as Record<string, unknown>[];
         if (!rows || rows.length === 0) {

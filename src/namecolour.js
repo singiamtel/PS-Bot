@@ -326,8 +326,8 @@ function userColorHash(name) {
     return a;
 }
 
-export let loadedCustomColors = false;
-export let customColors = {
+let loadedCustomColors = false;
+let customColors = {
     'theimmortal': 'taco',
     'bmelts': 'testmelts',
     'jumpluff': 'zacchaeus',
