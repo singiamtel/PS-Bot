@@ -4,7 +4,6 @@ import { config } from './config.js';
 
 // Mods
 import { apologyCounter, showApologiesLeaderboard, showApologiesRank } from './mods/apologies.js';
-import { addPoliticalCompass, politicalCompass, showCombinedPoliticalCompass } from './mods/political_compass.js';
 import { compareColours, nameColour } from './mods/namecolour.js';
 import { addCustom, answerToCustoms, deleteCustom, showCustoms } from './mods/customs.js';
 import { randttp, ttp } from './mods/ttp.js';
@@ -171,21 +170,6 @@ client.on('message', (message) => {
         case 'apologies':
             if (!config.whitelist.includes(username)) return;
             showApologiesRank(message);
-            break;
-
-        case 'addpc':
-            if (!config.whitelist.includes(username)) return;
-            addPoliticalCompass(message);
-            break;
-
-        case 'pc':
-            if (!config.whitelist.includes(username)) return;
-            politicalCompass(message, username);
-            break;
-
-        case 'pcall':
-            if (!config.whitelist.includes(username)) return;
-            showCombinedPoliticalCompass(message);
             break;
 
         case 'addhighlight':
