@@ -20,6 +20,7 @@ export function helpCommand(message: Message<'chat' | 'pm'>) {
                 <ul>
                     <li><code>${config.prefix}ttp</code>, <code>${config.prefix}ttp2</code>: See past Top Trumps Pets cards.</li>
                     <li><code>${config.prefix}randttp</code>, <code>${config.prefix}randttp2</code>: Random "Top Trumps Pets" card.</li>
+                    <li><code>${config.prefix}randomteam</code>, <code>${config.prefix}randteam</code>: Random competitive Pokémon team.</li>
                 </ul>
                 <p><strong>Mystery Box (Event):</strong></p>
                 <ul>
@@ -48,6 +49,7 @@ General:
 Fun & Games:
 - ${config.prefix}ttp, ${config.prefix}ttp2: See past Top Trumps Pets cards.
 - ${config.prefix}randttp, ${config.prefix}randttp2: Random "Top Trumps Pets" card.
+- ${config.prefix}randomteam, ${config.prefix}randteam: Random competitive Pokémon team.
 
 Mystery Box (Event):
 - ${config.prefix}rank: Check your rank.

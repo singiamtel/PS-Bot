@@ -9,6 +9,7 @@ import { compareColours, nameColour } from './mods/namecolour.js';
 import { addCustom, answerToCustoms, deleteCustom, showCustoms } from './mods/customs.js';
 import { randttp, ttp } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
+import { randomTeam } from './mods/randomteam.js';
 import { hook } from './hook.js';
 import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBcreateQuestion, MBshowAnswerBox, MBtestAuth, leaderboard, MBendQuestion, MBdeclareQuestion } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
@@ -203,6 +204,12 @@ client.on('message', (message) => {
         case 'highlights':
             if (!config.whitelist.includes(username)) return;
             listHighlights(message);
+            break;
+
+        case 'randomteam':
+        case 'randteam':
+            if (!atLeast('+', message)) return;
+            randomTeam(message);
             break;
 
         case 'help':

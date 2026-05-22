@@ -1,4 +1,5 @@
 import { type Message, Room, type User } from 'ps-client';
+import { toID } from 'ps-client/tools.js';
 import { config, rootDir } from './config.js';
 
 export { rootDir, config };
@@ -25,6 +26,10 @@ export function formatDate(date: Date) {
 
 export function isRoom(target: User | Room): target is Room {
     return target instanceof Room;
+}
+
+export function canUHTML(message: Message<'chat' | 'pm'>) {
+    return message.type === 'chat' && isRoom(message.target) && message.target.auth && message.target.auth['*']?.includes(toID(config.name));
 }
 
 export function inAllowedRooms(message: Message<'chat' | 'pm'>, rooms: string[]) {
@@ -55,6 +60,7 @@ export const commands = [
     'randttp',
     'randttp2',
     'randopple',
+    'randomteam', 'randteam',
     'rank',
     'answerbox',
     'leaderboard',
