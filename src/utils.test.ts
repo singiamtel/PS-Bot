@@ -100,6 +100,24 @@ describe('toOrdinal', () => {
         expect(toOrdinal(10)).toBe('10th');
         expect(toOrdinal(100)).toBe('100th');
     });
+
+    it('should handle teens correctly (11th, 12th, 13th)', () => {
+        expect(toOrdinal(11)).toBe('11th');
+        expect(toOrdinal(12)).toBe('12th');
+        expect(toOrdinal(13)).toBe('13th');
+    });
+
+    it('should handle numbers ending in 1/2/3 correctly (21st, 22nd, 23rd)', () => {
+        expect(toOrdinal(21)).toBe('21st');
+        expect(toOrdinal(22)).toBe('22nd');
+        expect(toOrdinal(23)).toBe('23rd');
+        expect(toOrdinal(31)).toBe('31st');
+        expect(toOrdinal(32)).toBe('32nd');
+        expect(toOrdinal(33)).toBe('33rd');
+        expect(toOrdinal(101)).toBe('101st');
+        expect(toOrdinal(102)).toBe('102nd');
+        expect(toOrdinal(103)).toBe('103rd');
+    });
 });
 
 describe('toCmd', () => {

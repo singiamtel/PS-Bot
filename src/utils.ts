@@ -38,10 +38,9 @@ export function inAllowedRooms(message: Message<'chat' | 'pm'>, rooms: string[])
 }
 
 export function toOrdinal(num: number) {
-    if (num === 1) return '1st';
-    if (num === 2) return '2nd';
-    if (num === 3) return '3rd';
-    return num + 'th';
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = num % 100;
+    return num + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 export const commands = [

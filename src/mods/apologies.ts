@@ -35,7 +35,7 @@ export function showApologiesRank(message: Message<'chat' | 'pm'>) {
     // Allow spaces in usernames
     const displayname = message.content.split(' ').slice(1).join(' ');
     const user = toID(displayname);
-    if (user === 'unknown') return message.reply('Please specify a user.');
+    if (!user) return message.reply('Please specify a user.');
     try {
         const rows = db.prepare('SELECT * FROM apologies WHERE name = ? ORDER BY points DESC LIMIT 10').all(user) as Record<string, unknown>[];
         if (!rows || rows.length === 0) return message.reply('No apologies yet.');

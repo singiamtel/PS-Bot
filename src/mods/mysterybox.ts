@@ -134,7 +134,7 @@ export function MBaddPoints(message: Message<'chat' | 'pm'>) {
     const [name, _points] = args.join(' ').split(',');
     const points = Number(_points);
     if (isNaN(points)) return message.reply('Please specify a valid number of points.');
-    if (!name || !points) return message.reply('Please specify a user and points.');
+    if (!name) return message.reply('Please specify a user and points.');
     const user = toID(name);
     if (!user) return message.reply('Please specify a user.');
     addPointsToUser(user, points);
