@@ -8,32 +8,32 @@ const repoUrl = 'https://github.com/singiamtel/PS-Bot';
 export function helpCommand(message: Message<'chat' | 'pm'>) {
     if (isRoom(message.target)) {
         const htmlContent = `
-            <div style="border: 1px solid #000; background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
-                <h3 style="margin-top: 0;">Available Commands:</h3>
-                <p><strong>General:</strong></p>
-                <ul>
-                    <li><code>${config.prefix}help</code>: Show this help message.</li>
-                    <li><code>${config.prefix}namecolour</code>: Get name color information.</li>
-                    <li><code>${config.prefix}comparecolours</code>: Compare two name colors.</li>
+            <div style="background:#1a1a2e;color:#e0e0e0;padding:12px;border-radius:8px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:11px;line-height:1.5">
+                <h3 style="margin:0 0 8px;color:#e94560;font-size:14px">Available Commands:</h3>
+                <p style="margin:4px 0"><strong style="color:#f5c518">General:</strong></p>
+                <ul style="margin:2px 0 6px;padding-left:18px">
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}help</code>: Show this help message.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}namecolour</code>: Get name color information.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}comparecolours</code>: Compare two name colors.</li>
                 </ul>
-                <p><strong>Fun & Games:</strong></p>
-                <ul>
-                    <li><code>${config.prefix}ttp</code>, <code>${config.prefix}ttp2</code>: See past Top Trumps Pets cards.</li>
-                    <li><code>${config.prefix}randttp</code>, <code>${config.prefix}randttp2</code>: Random "Top Trumps Pets" card.</li>
-                    <li><code>${config.prefix}randomteam</code>, <code>${config.prefix}randteam</code>: Random competitive Pokémon team.</li>
+                <p style="margin:4px 0"><strong style="color:#f5c518">Fun & Games:</strong></p>
+                <ul style="margin:2px 0 6px;padding-left:18px">
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}ttp</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}ttp2</code>: See past Top Trumps Pets cards.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randttp</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randttp2</code>: Random Top Trumps Pets card.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randomteam</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randteam</code>: Random competitive Pokemon team.</li>
                 </ul>
-                <p><strong>Mystery Box (Event):</strong></p>
-                <ul>
-                    <li><code>${config.prefix}rank</code>: Check your rank.</li>
-                    <li><code>${config.prefix}leaderboard</code>: Show the leaderboard.</li>
-                    <li><code>${config.prefix}answer &lt;answer&gt;</code>: Answer a question.</li>
+                <p style="margin:4px 0"><strong style="color:#f5c518">Mystery Box (Event):</strong></p>
+                <ul style="margin:2px 0 6px;padding-left:18px">
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}rank</code>: Check your rank.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}leaderboard</code>: Show the leaderboard.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}answer</code>: Answer a question.</li>
                 </ul>
-                <p><strong>Customs:</strong></p>
-                <ul>
-                    <li><code>${config.prefix}customs</code>: List custom commands.</li>
-                    <li><code>${config.prefix}addcustom</code>: Add a custom command (Auth only).</li>
+                <p style="margin:4px 0"><strong style="color:#f5c518">Customs:</strong></p>
+                <ul style="margin:2px 0 6px;padding-left:18px">
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}customs</code>: List custom commands.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}addcustom</code>: Add a custom command (Auth only).</li>
                 </ul>
-                <p>For more details and source code, visit: <a href="${repoUrl}">${repoUrl}</a></p>
+                <p style="margin:4px 0 0;font-size:10px;color:#aaa">Source: <a href="${repoUrl}" style="color:#4ea8de">${repoUrl.replace('https://', '')}</a></p>
             </div>
         `;
         return privateHTML(message, htmlContent, message.target.roomid);

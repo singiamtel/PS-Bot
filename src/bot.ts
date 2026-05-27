@@ -56,18 +56,15 @@ export function atLeast(rank: Rank, message: Message<'chat' | 'pm'>, quiet = fal
 }
 
 
-// take an optional settings object parameter with a default value of true
-// if no settings object is provided, default to sending the message in PM
-export function reply(message: Message<'chat' | 'pm'>, content: string, { inPm = true }: { inPm?: boolean } = {}) {
-    if (inPm) {
-        return message.author.send(content);
-    }
+export function reply(message: Message<'chat' | 'pm'>, content: string) {
     return message.reply(content);
 }
 
 export function privateHTML(message: Message<'chat' | 'pm'>, content: string, room: string) {
     if (!isRoom(message.target)) return message.author.send(content);
-    return message.reply(`/msgroom ${room},/sendprivatehtmlbox  ${message.author.id}, ${content}`);
+    const sent = message.replyHTML(content, { name: 'help' });
+    if (sent) return sent;
+    return message.reply(`/msgroom ${room},/sendprivatehtmlbox  ${message.author.id}, ${content.replace(/\n\s*/g, ' ')}`);
 }
 
 logger.info({ cmd: 'bot', message: 'Loaded config', config });

@@ -133,34 +133,16 @@ describe('roomAtLeast', () => {
 });
 
 describe('reply', () => {
-    it('should send message in PM by default', () => {
-        const sendMock = vi.fn();
+    it('should reply in the same context as the message', () => {
         const replyMock = vi.fn();
 
         const message = {
-            author: { send: sendMock },
             reply: replyMock,
         } as unknown as Message<'chat' | 'pm'>;
 
         reply(message, 'test content');
 
-        expect(sendMock).toHaveBeenCalledWith('test content');
-        expect(replyMock).not.toHaveBeenCalled();
-    });
-
-    it('should reply in public when inPm is false', () => {
-        const sendMock = vi.fn();
-        const replyMock = vi.fn();
-
-        const message = {
-            author: { send: sendMock },
-            reply: replyMock,
-        } as unknown as Message<'chat' | 'pm'>;
-
-        reply(message, 'test content', { inPm: false });
-
         expect(replyMock).toHaveBeenCalledWith('test content');
-        expect(sendMock).not.toHaveBeenCalled();
     });
 });
 

@@ -59,149 +59,155 @@ client.on('message', (message) => {
     }
     // const hasPerms = getAuth(message) || isRoomAuth || config.whitelist.includes(username)
 
-    switch (cmd) {
+    logger.verbose({ cmd: 'dispatch', message: 'Command dispatched', command: cmd, username, target });
+
+    try {
+        switch (cmd) {
         // 'namecolour', 'namecolor',
         // 'comparecolours', 'comparecolors', 'comparecolor', 'comparecolour', 'compare',
-        case 'namecolour':
-        case 'namecolor':
-            if (!atLeast('+', message)) return;
-            nameColour(message, client.status.username);
-            break;
+            case 'namecolour':
+            case 'namecolor':
+                if (!atLeast('+', message)) return;
+                nameColour(message, client.status.username);
+                break;
 
-        case 'comparecolours':
-        case 'comparecolors':
-        case 'comparecolor':
-        case 'comparecolour':
-        case 'compare':
-            if (!atLeast('+', message)) return;
-            compareColours(message, client.status.username);
-            break;
+            case 'comparecolours':
+            case 'comparecolors':
+            case 'comparecolor':
+            case 'comparecolour':
+            case 'compare':
+                if (!atLeast('+', message)) return;
+                compareColours(message, client.status.username);
+                break;
 
-        case 'ttp':
-            if (!atLeast('+', message)) return;
-            ttp(message, 1);
-            break;
+            case 'ttp':
+                if (!atLeast('+', message)) return;
+                ttp(message, 1);
+                break;
 
-        case 'ttp2':
-            if (!atLeast('+', message)) return;
-            ttp(message, 2);
-            break;
+            case 'ttp2':
+                if (!atLeast('+', message)) return;
+                ttp(message, 2);
+                break;
 
-        case 'randttp':
-            if (!atLeast('+', message)) return;
-            randttp(message, 1);
-            break;
+            case 'randttp':
+                if (!atLeast('+', message)) return;
+                randttp(message, 1);
+                break;
 
-        case 'randttp2':
-            if (!atLeast('+', message)) return;
-            randttp(message, 2);
-            break;
+            case 'randttp2':
+                if (!atLeast('+', message)) return;
+                randttp(message, 2);
+                break;
 
-        case 'randopple':
-            if (!atLeast('+', message)) return;
-            randopple(message);
-            break;
+            case 'randopple':
+                if (!atLeast('+', message)) return;
+                randopple(message);
+                break;
 
-        case 'rank':
-            MBrank(message);
-            break;
+            case 'rank':
+                MBrank(message);
+                break;
 
-        case 'answerbox':
-            MBshowAnswerBox(message);
-            break;
+            case 'answerbox':
+                MBshowAnswerBox(message);
+                break;
 
-        case 'leaderboard':
-        case 'lb':
-            MBleaderboard(message);
-            break;
+            case 'leaderboard':
+            case 'lb':
+                MBleaderboard(message);
+                break;
 
-        case 'testauth':
-            MBtestAuth(message);
-            break;
+            case 'testauth':
+                MBtestAuth(message);
+                break;
 
-        case 'answer':
-            MBanswerQuestion(message);
-            break;
+            case 'answer':
+                MBanswerQuestion(message);
+                break;
 
-        case 'newquestion':
-            if (!roomAtLeast('%', message, config.hostRoom)) return;
-            MBcreateQuestion(message);
-            break;
+            case 'newquestion':
+                if (!roomAtLeast('%', message, config.hostRoom)) return;
+                MBcreateQuestion(message);
+                break;
 
-        case 'endquestion':
-            if (!roomAtLeast('%', message, config.hostRoom)) return;
-            MBendQuestion(message);
-            break;
+            case 'endquestion':
+                if (!roomAtLeast('%', message, config.hostRoom)) return;
+                MBendQuestion(message);
+                break;
 
-        case 'declare':
-            if (!roomAtLeast('%', message, config.hostRoom)) return;
-            MBdeclareQuestion(message);
-            break;
+            case 'declare':
+                if (!roomAtLeast('%', message, config.hostRoom)) return;
+                MBdeclareQuestion(message);
+                break;
 
-        case 'addp':
-            if (!roomAtLeast('%', message, config.hostRoom)) return;
-            MBaddPoints(message);
-            break;
+            case 'addp':
+                if (!roomAtLeast('%', message, config.hostRoom)) return;
+                MBaddPoints(message);
+                break;
 
-        case 'addcustom':
-            if (!atLeast('#', message)) return;
-            addCustom(message);
-            break;
+            case 'addcustom':
+                if (!atLeast('#', message)) return;
+                addCustom(message);
+                break;
 
-        case 'deletecustom':
-        case 'delcustom':
-        case 'removecustom':
-            if (!atLeast('#', message)) return;
-            deleteCustom(message);
-            break;
+            case 'deletecustom':
+            case 'delcustom':
+            case 'removecustom':
+                if (!atLeast('#', message)) return;
+                deleteCustom(message);
+                break;
 
-        case 'showcustom':
-        case 'customs':
-        case 'listcustom':
-            if (!atLeast('%', message)) return;
-            showCustoms(message);
-            break;
+            case 'showcustom':
+            case 'customs':
+            case 'listcustom':
+                if (!atLeast('%', message)) return;
+                showCustoms(message);
+                break;
 
-        case 'top':
-            if (!config.whitelist.includes(username)) return;
-            showApologiesLeaderboard(message);
-            break;
+            case 'top':
+                if (!config.whitelist.includes(username)) return;
+                showApologiesLeaderboard(message);
+                break;
 
-        case 'apologies':
-            if (!config.whitelist.includes(username)) return;
-            showApologiesRank(message);
-            break;
+            case 'apologies':
+                if (!config.whitelist.includes(username)) return;
+                showApologiesRank(message);
+                break;
 
-        case 'addhighlight':
-        case 'highlight':
-            if (!config.whitelist.includes(username)) return;
-            addHighlight(message);
-            break;
+            case 'addhighlight':
+            case 'highlight':
+                if (!config.whitelist.includes(username)) return;
+                addHighlight(message);
+                break;
 
-        case 'removehighlight':
-        case 'delhighlight':
-            if (!config.whitelist.includes(username)) return;
-            removeHighlight(message);
-            break;
+            case 'removehighlight':
+            case 'delhighlight':
+                if (!config.whitelist.includes(username)) return;
+                removeHighlight(message);
+                break;
 
-        case 'listhighlight':
-        case 'highlights':
-            if (!config.whitelist.includes(username)) return;
-            listHighlights(message);
-            break;
+            case 'listhighlight':
+            case 'highlights':
+                if (!config.whitelist.includes(username)) return;
+                listHighlights(message);
+                break;
 
-        case 'randomteam':
-        case 'randteam':
-            if (!atLeast('+', message)) return;
-            randomTeam(message);
-            break;
+            case 'randomteam':
+            case 'randteam':
+                if (!atLeast('+', message)) return;
+                randomTeam(message);
+                break;
 
-        case 'help':
-            helpCommand(message);
-            break;
+            case 'help':
+                helpCommand(message);
+                break;
 
-        default:
-            assertNever(cmd);
+            default:
+                assertNever(cmd);
+        }
+    } catch (e) {
+        logger.error({ cmd: 'dispatch', error: (e as Error).message, command: cmd, username, target });
     }
 
     if (!config.whitelist.includes(username)) return;
