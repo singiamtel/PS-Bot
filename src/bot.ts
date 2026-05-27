@@ -29,6 +29,10 @@ export const rankOrder: Record<Rank, number> = {
     ' ': 2,
 } as const;
 
+function permsDeniedBox(rank: Rank) {
+    return `<div style="border:1px solid #ba0000;background:#ffe0e0;padding:8px;border-radius:4px"><strong style="color:#ba0000">Permission Denied</strong><br>You need to be at least <strong>${rank}</strong> rank to use this command.</div>`;
+}
+
 export function roomAtLeast(minRank: Rank, message: Message<'chat' | 'pm'>, room: string) {
     if (config.whitelist.includes(message.author?.id)) { return true; }
     if (atLeast(minRank, message, true)) return true; // Global perms
@@ -36,21 +40,26 @@ export function roomAtLeast(minRank: Rank, message: Message<'chat' | 'pm'>, room
     const authObject = client.getRoom(room)?.auth;
     if (!authObject) {
         logger.error({ cmd: 'bot', message: 'No auth object found in room', room });
+        privateHTML(message, permsDeniedBox(minRank), room);
         return false;
     }
     const authList = Object.entries(authObject).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] >= rankOrder[minRank]).map(([_rank, userArray]) => userArray).flat().map(toID);
-    return authList.includes(toID(message.author.id));
+    const hasPerms = authList.includes(toID(message.author.id));
+    if (!hasPerms) privateHTML(message, permsDeniedBox(minRank), room);
+    return hasPerms;
 }
 
 
 export function atLeast(rank: Rank, message: Message<'chat' | 'pm'>, quiet = false) {
     if (config.whitelist.includes(toID(message.author.name))) return true; // whitelist
     if (message.msgRank === undefined) {
+        if (!quiet) privateHTML(message, permsDeniedBox(rank), isRoom(message.target) ? message.target.roomid : '');
         return false;
     }
     const hasPerms = rankOrder[message.msgRank] >= rankOrder[rank];
     if (!hasPerms && !quiet) {
         logger.warn({ cmd: 'chat', error: 'User does not have permission', username: toID(message.author.name), rank: message.msgRank, requiredRank: rank, message: message.content });
+        privateHTML(message, permsDeniedBox(rank), isRoom(message.target) ? message.target.roomid : '');
     }
     return hasPerms;
 }

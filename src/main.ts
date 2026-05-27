@@ -1,5 +1,6 @@
 import { determineColour, loadCustomColors } from './namecolour.js';
-import client, { atLeast, roomAtLeast } from './bot.js';
+import { type Message } from 'ps-client';
+import client, { atLeast, privateHTML, roomAtLeast } from './bot.js';
 import { config } from './config.js';
 
 // Mods
@@ -22,6 +23,11 @@ import { saveChat } from './mods/saveChat.js';
 
 const pmBotCooldown = new Map<string, number>();
 const PM_BOT_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+
+function whitelistDenied(message: Message<'chat' | 'pm'>) {
+    const room = isRoom(message.target) ? message.target.roomid : '';
+    privateHTML(message, '<div style="border:1px solid #ba0000;background:#ffe0e0;padding:8px;border-radius:4px"><strong style="color:#ba0000">Permission Denied</strong><br>You are not authorized to use this command.</div>', room);
+}
 
 client.on('message', (message) => {
     if (message.isIntro || message.author?.name === client.status.username || message.author?.name === undefined) return;
@@ -166,30 +172,30 @@ client.on('message', (message) => {
                 break;
 
             case 'top':
-                if (!config.whitelist.includes(username)) return;
+                if (!config.whitelist.includes(username)) { whitelistDenied(message); return; }
                 showApologiesLeaderboard(message);
                 break;
 
             case 'apologies':
-                if (!config.whitelist.includes(username)) return;
+                if (!config.whitelist.includes(username)) { whitelistDenied(message); return; }
                 showApologiesRank(message);
                 break;
 
             case 'addhighlight':
             case 'highlight':
-                if (!config.whitelist.includes(username)) return;
+                if (!config.whitelist.includes(username)) { whitelistDenied(message); return; }
                 addHighlight(message);
                 break;
 
             case 'removehighlight':
             case 'delhighlight':
-                if (!config.whitelist.includes(username)) return;
+                if (!config.whitelist.includes(username)) { whitelistDenied(message); return; }
                 removeHighlight(message);
                 break;
 
             case 'listhighlight':
             case 'highlights':
-                if (!config.whitelist.includes(username)) return;
+                if (!config.whitelist.includes(username)) { whitelistDenied(message); return; }
                 listHighlights(message);
                 break;
 

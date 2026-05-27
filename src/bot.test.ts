@@ -55,9 +55,10 @@ describe('atLeast', () => {
         author: {
             name: authorName,
             id: authorName.toLowerCase(),
+            send: vi.fn(),
         },
         content: 'test message',
-    } as Message<'chat' | 'pm'>);
+    } as unknown as Message<'chat' | 'pm'>);
 
     it('should return true for whitelisted users regardless of rank', () => {
         expect(atLeast('+', createMessage(undefined, 'whitelisteduser'))).toBe(true);
@@ -173,6 +174,7 @@ describe('privateHTML', () => {
             target: room,
             author: { id: 'testuser', send: sendMock },
             reply: replyMock,
+            replyHTML: vi.fn().mockReturnValue(undefined),
         } as unknown as Message<'chat' | 'pm'>;
 
         privateHTML(message, '<b>test</b>', 'testroom');
