@@ -8,11 +8,11 @@ export function nameColour(message: Message<'chat' | 'pm'>, username: string | n
     const displayname = toID(message.content.split(' ').slice(1).join(' '));
     const nameColour = determineColour(displayname);
     const colour = namer(nameColour).ntc[0];
+    const delta = hexColorDelta(nameColour, colour.hex);
+    const fixedDelta = (delta * 100).toFixed(2);
     if (canUHTML(message) && username) {
-        const delta = hexColorDelta(nameColour, colour.hex);
-        const fixedDelta = (delta * 100).toFixed(2);
         return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${nameColour}<br> I think that's <strong style="color:#${colour.hex}; ">${colour.name}</strong> (${fixedDelta}% match)`);
-    } else { return message.reply(`I think that's ${colour.name} (#${colour.hex})`); }
+    } else { return message.reply(`I think that's ${colour.name} (#${colour.hex}) (${fixedDelta}% match)`); }
 }
 
 export function compareColours(message: Message<'chat' | 'pm'>, username: string | null | undefined) {
