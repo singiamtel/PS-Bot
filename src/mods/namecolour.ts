@@ -1,18 +1,31 @@
 import namer from 'color-namer';
-import { determineColour, hexColorDelta } from '../namecolour.js';
+import { determineColour, getCustomColourDetails, hexColorDelta } from '../namecolour.js';
 import type { Message } from 'ps-client';
 import { toID } from 'ps-client/tools.js';
 import { canUHTML } from '../utils.js';
 
+function colourSwatch(colour: string) {
+    return `<span style="display:inline-block;width:10px;height:10px;background:${colour};border:1px solid #888;vertical-align:-1px"></span> ${colour}`;
+}
+
 export function nameColour(message: Message<'chat' | 'pm'>, username: string | null | undefined) {
     const displayname = toID(message.content.split(' ').slice(1).join(' '));
     const nameColour = determineColour(displayname);
+    const customColour = getCustomColourDetails(displayname);
     const colour = namer(nameColour).ntc[0];
     const delta = hexColorDelta(nameColour, colour.hex);
     const fixedDelta = (delta * 100).toFixed(2);
     if (canUHTML(message) && username) {
-        return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${nameColour}<br> I think that's <strong style="color:#${colour.hex}; ">${colour.name}</strong> (${fixedDelta}% match)`);
-    } else { return message.reply(`I think that's ${colour.name} (#${colour.hex}) (${fixedDelta}% match)`); }
+        const customColourHtml = customColour ?
+            `<br>Custom colour: ${colourSwatch(customColour.oldColour)} -> ${colourSwatch(customColour.newColour)} (from ${customColour.source})` :
+            '';
+        return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${nameColour}${customColourHtml}<br> I think that's <strong style="color:#${colour.hex}; ">${colour.name}</strong> (${fixedDelta}% match)`);
+    } else {
+        const customColourText = customColour ?
+            `${displayname} has a custom colour: ${customColour.oldColour} -> ${customColour.newColour} (from ${customColour.source}). ` :
+            '';
+        return message.reply(`${customColourText}I think that's ${colour.name} (#${colour.hex}) (${fixedDelta}% match)`);
+    }
 }
 
 export function compareColours(message: Message<'chat' | 'pm'>, username: string | null | undefined) {

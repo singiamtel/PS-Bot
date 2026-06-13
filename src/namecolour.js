@@ -623,8 +623,36 @@ export async function loadCustomColors() {
     }
 }
 
+function getCustomColourSource(name) {
+    const customColour = customColors[toID(name)];
+    if (!customColour) return null;
+    if (typeof customColour === 'string') return customColour;
+    if (typeof customColour === 'object' && typeof customColour.color === 'string') return customColour.color;
+    return null;
+}
+
+function colourFromSource(source) {
+    if (/^#[0-9a-f]{6}$/i.test(source)) {
+        return source.toUpperCase();
+    }
+    return userColorHash(source);
+}
+
+export function getCustomColourDetails(name) {
+    const id = toID(name);
+    const source = getCustomColourSource(id);
+    if (!source) return null;
+    return {
+        id,
+        source,
+        oldColour: userColorHash(id),
+        newColour: colourFromSource(source),
+    };
+}
+
 export function determineColour(name) {
-    return userColorHash(customColors[toID(name)] || toID(name));
+    const id = toID(name);
+    return colourFromSource(getCustomColourSource(id) || id);
 }
 
 
