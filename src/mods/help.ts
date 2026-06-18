@@ -21,6 +21,7 @@ export function helpCommand(message: Message<'chat' | 'pm'>) {
                     <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}ttp</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}ttp2</code>: See past Top Trumps Pets cards.</li>
                     <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randttp</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randttp2</code>: Random Top Trumps Pets card.</li>
                     <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randomteam</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randteam</code>: Random competitive Pokemon team.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randompokemon</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randmon</code>: Generate a random fakemon.</li>
                 </ul>
                 <p style="margin:4px 0"><strong style="color:#f5c518">Mystery Box (Event):</strong></p>
                 <ul style="margin:2px 0 6px;padding-left:18px">
@@ -50,6 +51,7 @@ Fun & Games:
 - ${config.prefix}ttp, ${config.prefix}ttp2: See past Top Trumps Pets cards.
 - ${config.prefix}randttp, ${config.prefix}randttp2: Random "Top Trumps Pets" card.
 - ${config.prefix}randomteam, ${config.prefix}randteam: Random competitive Pokémon team.
+- ${config.prefix}randompokemon, ${config.prefix}randmon: Generate a random fakemon.
 
 Mystery Box (Event):
 - ${config.prefix}rank: Check your rank.

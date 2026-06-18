@@ -52,6 +52,7 @@ export const commands = [
     'randttp2',
     'randopple',
     'randomteam', 'randteam',
+    'randompokemon', 'randpokemon', 'randmon', 'fakemon',
     'rank',
     'answerbox',
     'leaderboard',

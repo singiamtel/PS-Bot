@@ -10,6 +10,7 @@ import { addCustom, answerToCustoms, deleteCustom, showCustoms } from './mods/cu
 import { randttp, ttp } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { randomTeam } from './mods/randomteam.js';
+import { randomPokemon } from './mods/randompokemon.js';
 import { hook } from './hook.js';
 import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBcreateQuestion, MBshowAnswerBox, MBtestAuth, leaderboard, MBendQuestion, MBdeclareQuestion } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
@@ -203,6 +204,14 @@ client.on('message', (message) => {
             case 'randteam':
                 if (!atLeast('+', message)) return;
                 randomTeam(message);
+                break;
+
+            case 'randompokemon':
+            case 'randpokemon':
+            case 'randmon':
+            case 'fakemon':
+                if (!atLeast('+', message)) return;
+                randomPokemon(message);
                 break;
 
             case 'help':
