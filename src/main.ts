@@ -11,6 +11,7 @@ import { randttp, ttp } from './mods/ttp.js';
 import { randopple } from './mods/randopple.js';
 import { randomTeam } from './mods/randomteam.js';
 import { randomPokemon } from './mods/randompokemon.js';
+import { compactDex } from './mods/dex.js';
 import { hook } from './hook.js';
 import { MBaddPoints, MBanswerQuestion, MBgetAnswers, MBleaderboard, MBrank, MBcreateQuestion, MBshowAnswerBox, MBtestAuth, leaderboard, MBendQuestion, MBdeclareQuestion } from './mods/mysterybox.js';
 import { toID } from 'ps-client/tools.js';
@@ -27,7 +28,7 @@ const PM_BOT_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
 
 function whitelistDenied(message: Message<'chat' | 'pm'>) {
     const room = isRoom(message.target) ? message.target.roomid : '';
-    privateHTML(message, '<div style="border:1px solid #ba0000;background:#ffe0e0;padding:8px;border-radius:4px"><strong style="color:#ba0000">Permission Denied</strong><br>You are not authorized to use this command.</div>', room);
+    privateHTML(message, '<div style="border:1px solid #ba0000;background:#ffe0e0;padding:8px;border-radius:4px"><strong style="color:#ba0000">Permission Denied</strong><br>You are not authorized to use this command.</div>', room, { name: 'permission-denied' });
 }
 
 client.on('message', (message) => {
@@ -212,6 +213,14 @@ client.on('message', (message) => {
             case 'fakemon':
                 if (!atLeast('+', message)) return;
                 randomPokemon(message);
+                break;
+
+            case 'dt':
+            case 'dex':
+            case 'compactdt':
+            case 'dexcompact':
+                if (!atLeast('+', message)) return;
+                compactDex(message);
                 break;
 
             case 'help':

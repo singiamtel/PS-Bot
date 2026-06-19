@@ -11,6 +11,12 @@ import { logger } from '../logger.js';
 const legalDifficulties = ['easy', 'medium', 'hard'];
 const hostRoom = config.hostRoom;
 
+type HostRoomHTMLOptions = {
+    name?: string;
+    change?: boolean;
+    notransform?: boolean;
+};
+
 export function MBtestAuth(message: Message<'chat' | 'pm'>) {
     return roomAtLeast('%', message, hostRoom) ? reply(message, `You are auth in ${hostRoom}.`) : reply(message, `You are not auth in ${hostRoom}.`);
 }
@@ -57,19 +63,19 @@ export function MBanswerQuestion(message: Message<'chat' | 'pm'>) {
         return;
     }
     if (!isQuestionOngoing()) {
-        return answerInRoom ? privateHTML(message, 'There is no ongoing question.', hostRoom) : reply(message, 'There is no ongoing question.');
+        return answerInRoom ? privateHostRoomHTML(message, 'There is no ongoing question.') : reply(message, 'There is no ongoing question.');
     }
     if (isInCooldown(message.author.id)) {
-        return answerInRoom ? privateHTML(message, 'You can only answer 3 times per hour.', hostRoom) : reply(message, 'You can only answer 3 times per hour.');
+        return answerInRoom ? privateHostRoomHTML(message, 'You can only answer 3 times per hour.') : reply(message, 'You can only answer 3 times per hour.');
     }
-    if (winners.includes(message.author.id)) return answerInRoom ? privateHTML(message, 'You already answered correctly. Please wait for the next question.', hostRoom) : reply(message, 'You already answered correctly. Please wait for the next question.');
+    if (winners.includes(message.author.id)) return answerInRoom ? privateHostRoomHTML(message, 'You already answered correctly. Please wait for the next question.') : reply(message, 'You already answered correctly. Please wait for the next question.');
     if (answer === attempt.toLowerCase().trim()) {
         const points = difficulty === 'easy' ? 2 : difficulty === 'medium' ? winners.length <= 3 ? 6 - winners.length : 3 : winners.length <= 5 ? 9 - winners.length : 4;
         addWinner(message.author.id);
         addPointsToUser(message.author.id, points);
         const msgContent = `Correct answer! You were the ${toOrdinal(winners.length)} person to answer correctly. You have been awarded ${points} points.`;
         if (answerInRoom) {
-            privateHTML(message, msgContent, hostRoom);
+            privateHostRoomHTML(message, msgContent);
         } else {
             reply(message, msgContent);
         }
@@ -79,13 +85,13 @@ export function MBanswerQuestion(message: Message<'chat' | 'pm'>) {
                 logger.error({ cmd: 'mysteryboxAnswer', message: 'Can\'t declare winner, bot is not present in the host room', room: hostRoom, content: message.content });
                 return;
             }
-            room.send(`/adduhtml MB${winners.length}, <div class="broadcast-blue"><center>${message.author.name} has answered in ${toOrdinal(winners.length)} place!</center></div>`);
+            room.sendHTML(`<div class="broadcast-blue"><center>${message.author.name} has answered in ${toOrdinal(winners.length)} place!</center></div>`, { name: `MB${winners.length}` });
         }
         return;
     } else {
         if (answerInRoom) {
             refreshAnswerBox(message, message.author.id);
-            privateHTML(message, 'Wrong answer, please try again.', hostRoom);
+            privateHostRoomHTML(message, 'Wrong answer, please try again.');
         } else {
             reply(message, 'Wrong answer, please try again.');
         }
@@ -96,11 +102,25 @@ export function MBanswerQuestion(message: Message<'chat' | 'pm'>) {
 
 const answerBox = `<center><div style="padding: 10px; border-radius:15px;background-color: #ffeac9 ; color: #85071c; width:500px; border: 1px solid #85071c">  <h1>Enter your guess!</h1> <form data-submitsend="/msgroom ${config.hostRoom},/botmsg ${config.name}, ${config.prefix}answer {answer}"><input autofocus style="width: 400px; margin: 0 auto" autocomplete="off" name="answer" placeholder="Your guess goes here" style="width:60%;"><button style="display:block;margin: 10px;padding: 2px" class="button">Submit</button></form></div></center>`;
 
-function refreshAnswerBox(message: Message<'chat' | 'pm'>, user: string | null) {
-    if (user) {
-        return message.reply(`/msgroom ${config.hostRoom},/sendprivateuhtml ${user},answerbox, ${answerBox}`);
+function privateHostRoomHTML(message: Message<'chat' | 'pm'>, content: string, options: HostRoomHTMLOptions = {}) {
+    const room = client.rooms.get(hostRoom);
+    if (!room) {
+        logger.error({ cmd: 'mysteryboxPrivateHTML', message: 'Can\'t send private room HTML, bot is not present in the host room', room: hostRoom, content: message.content });
+        return privateHTML(message, content, hostRoom, options);
     }
-    message.reply(`/msgroom ${config.hostRoom},/adduhtml answerbox, ${answerBox}`);
+    return room.privateHTML(message.author.id, content, options) ?? privateHTML(message, content, hostRoom, options);
+}
+
+function refreshAnswerBox(message: Message<'chat' | 'pm'>, user: string | null) {
+    const room = client.rooms.get(hostRoom);
+    if (!room) {
+        logger.error({ cmd: 'mysteryboxAnswerBox', message: 'Can\'t show answer box, bot is not present in the host room', room: hostRoom, content: message.content });
+        return null;
+    }
+    if (user) {
+        return room.privateHTML(user, answerBox, { name: 'answerbox' });
+    }
+    return room.sendHTML(answerBox, { name: 'answerbox' });
 }
 
 export function MBshowAnswerBox(message: Message<'chat' | 'pm'>) {
@@ -164,7 +184,7 @@ export function MBleaderboard(message: Message<'chat' | 'pm'>) {
     const isBotMsg = botMsg.test(message.content);
     if (isBotMsg) {
         const htmlTable = leaderboard();
-        privateHTML(message, htmlTable, hostRoom);
+        privateHostRoomHTML(message, htmlTable, { name: 'MBleaderboard' });
         return;
     }
     if (isRoom(message.target)) {
@@ -172,7 +192,7 @@ export function MBleaderboard(message: Message<'chat' | 'pm'>) {
             return;
         }
         const htmlTable = leaderboard();
-        message.reply(`/adduhtml MBleaderboard, ${htmlTable}`);
+        message.target.sendHTML(htmlTable, { name: 'MBleaderboard' });
         return;
     }
     if (!isRoom(message.target) || atLeast('+', message)) {
@@ -193,7 +213,7 @@ export function MBrank(message: Message<'chat' | 'pm'>) {
         const rows = db.prepare('SELECT * FROM mysterybox WHERE name = ?').all(user) as unknown as Record<string, unknown>[];
         if (!rows || rows.length === 0) {
             if (!isRoom(message.target) || atLeast('+', message)) {
-                return isBotMsg ? privateHTML(message, `${displayname} has no points yet.`, hostRoom) : message.reply(`${displayname} has no points yet.`);
+                return isBotMsg ? privateHostRoomHTML(message, `${displayname} has no points yet.`, { name: `MBrank-${user}` }) : message.reply(`${displayname} has no points yet.`);
             } else {
                 // Pm the user
                 return message.author.send(`This user has no points yet.`);
@@ -201,7 +221,7 @@ export function MBrank(message: Message<'chat' | 'pm'>) {
         }
         const points = rows[0].points;
         if (isBotMsg) {
-            return privateHTML(message, `${displayname} has ${points} points.`, hostRoom);
+            return privateHostRoomHTML(message, `${displayname} has ${points} points.`, { name: `MBrank-${user}` });
         }
         if (!isRoom(message.target) || atLeast('+', message)) {
             return message.reply(`${displayname} has ${points} points.`);

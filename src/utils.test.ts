@@ -3,6 +3,7 @@ import {
     padTo2Digits,
     formatDate,
     isRoom,
+    canUHTML,
     inAllowedRooms,
     toOrdinal,
     toCmd,
@@ -47,6 +48,37 @@ describe('isRoom', () => {
     it('should return false for User instances', () => {
         const user = new User({ id: 'testuser' }, {} as any);
         expect(isRoom(user)).toBe(false);
+    });
+});
+
+describe('canUHTML', () => {
+    function createRoomMessage(rank: '*' | '#' | '&' | '+'): Message<'chat' | 'pm'> {
+        const room = new Room('testroom', {} as any);
+        room.auth = { [rank]: ['testbot'] } as any;
+        return {
+            type: 'chat',
+            target: room,
+        } as Message<'chat' | 'pm'>;
+    }
+
+    it('matches ps-client room HTML ranks', () => {
+        expect(canUHTML(createRoomMessage('*'))).toBe(true);
+        expect(canUHTML(createRoomMessage('#'))).toBe(true);
+        expect(canUHTML(createRoomMessage('&'))).toBe(true);
+    });
+
+    it('returns false without a UHTML-capable rank', () => {
+        expect(canUHTML(createRoomMessage('+'))).toBe(false);
+    });
+
+    it('returns false outside room chat', () => {
+        const user = new User({ id: 'testuser' }, {} as any);
+        const message = {
+            type: 'pm',
+            target: user,
+        } as unknown as Message<'chat' | 'pm'>;
+
+        expect(canUHTML(message)).toBe(false);
     });
 });
 

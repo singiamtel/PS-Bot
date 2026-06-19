@@ -22,6 +22,7 @@ export function helpCommand(message: Message<'chat' | 'pm'>) {
                     <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randttp</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randttp2</code>: Random Top Trumps Pets card.</li>
                     <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randomteam</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randteam</code>: Random competitive Pokemon team.</li>
                     <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randompokemon</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}randmon</code>: Generate a random fakemon.</li>
+                    <li><code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}dt</code>, <code style="background:#16213e;padding:1px 4px;border-radius:3px">${config.prefix}dex</code>: Compact Pokemon Dex lookup.</li>
                 </ul>
                 <p style="margin:4px 0"><strong style="color:#f5c518">Mystery Box (Event):</strong></p>
                 <ul style="margin:2px 0 6px;padding-left:18px">
@@ -37,7 +38,7 @@ export function helpCommand(message: Message<'chat' | 'pm'>) {
                 <p style="margin:4px 0 0;font-size:10px;color:#aaa">Source: <a href="${repoUrl}" style="color:#4ea8de">${repoUrl.replace('https://', '')}</a></p>
             </div>
         `;
-        return privateHTML(message, htmlContent, message.target.roomid);
+        return privateHTML(message, htmlContent, message.target.roomid, { name: 'help' });
     } else {
         const helpText = `
 Available Commands:
@@ -52,6 +53,7 @@ Fun & Games:
 - ${config.prefix}randttp, ${config.prefix}randttp2: Random "Top Trumps Pets" card.
 - ${config.prefix}randomteam, ${config.prefix}randteam: Random competitive Pokémon team.
 - ${config.prefix}randompokemon, ${config.prefix}randmon: Generate a random fakemon.
+- ${config.prefix}dt, ${config.prefix}dex: Compact Pokemon Dex lookup.
 
 Mystery Box (Event):
 - ${config.prefix}rank: Check your rank.

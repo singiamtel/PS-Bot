@@ -1,4 +1,5 @@
 import type { Message } from 'ps-client';
+import { escapeHTML } from 'ps-client/tools.js';
 
 const types = [
     'Normal',
@@ -200,16 +201,6 @@ function randomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function escapeHTML(text: string | number) {
-    return String(text).replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        '\'': '&#39;',
-    }[char] as string));
-}
-
 function typeIcon(type: string) {
     const sanitizedType = encodeURIComponent(type).replace(/\?/g, '%3f');
     return `<img src="${typeIconBaseUrl}${sanitizedType}.png" alt="${escapeHTML(type)}" height="14" width="32" style="image-rendering:pixelated;vertical-align:middle;margin-right:4px" />`;
@@ -330,5 +321,5 @@ export function renderRandomPokemonHTML(pokemon: RandomPokemon) {
 }
 
 export function randomPokemon(message: Message<'chat' | 'pm'>) {
-    message.reply(`!htmlbox ${renderRandomPokemonHTML(generateRandomPokemon())}`);
+    message.sendHTML(renderRandomPokemonHTML(generateRandomPokemon()));
 }

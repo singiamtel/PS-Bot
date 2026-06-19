@@ -150,36 +150,65 @@ describe('reply', () => {
 describe('privateHTML', () => {
     it('should send PM if not in a room', () => {
         const sendMock = vi.fn();
-        const replyMock = vi.fn();
+        const replyHTMLMock = vi.fn().mockReturnValue('<b>test</b>');
         const user = new User({ id: 'testuser' }, {} as any);
 
         const message = {
             target: user,
             author: { id: 'testuser', send: sendMock },
-            reply: replyMock,
+            replyHTML: replyHTMLMock,
         } as unknown as Message<'chat' | 'pm'>;
 
         privateHTML(message, '<b>test</b>', 'testroom');
 
-        expect(sendMock).toHaveBeenCalledWith('<b>test</b>');
-        expect(replyMock).not.toHaveBeenCalled();
+        expect(replyHTMLMock).toHaveBeenCalledWith('<b>test</b>', { room: 'testroom' });
+        expect(sendMock).not.toHaveBeenCalled();
     });
 
-    it('should use msgroom command when in a room', () => {
+    it('should use replyHTML when in a room', () => {
         const sendMock = vi.fn();
-        const replyMock = vi.fn();
+        const replyHTMLMock = vi.fn().mockReturnValue('<b>test</b>');
         const room = new Room('testroom', {} as any);
 
         const message = {
             target: room,
             author: { id: 'testuser', send: sendMock },
-            reply: replyMock,
-            replyHTML: vi.fn().mockReturnValue(undefined),
+            replyHTML: replyHTMLMock,
         } as unknown as Message<'chat' | 'pm'>;
 
         privateHTML(message, '<b>test</b>', 'testroom');
 
-        expect(replyMock).toHaveBeenCalledWith('/msgroom testroom,/sendprivatehtmlbox  testuser, <b>test</b>');
+        expect(replyHTMLMock).toHaveBeenCalledWith('<b>test</b>', {});
         expect(sendMock).not.toHaveBeenCalled();
+    });
+
+    it('passes explicit UHTML options through', () => {
+        const replyHTMLMock = vi.fn().mockReturnValue('<b>test</b>');
+        const room = new Room('testroom', {} as any);
+
+        const message = {
+            target: room,
+            author: { id: 'testuser', send: vi.fn() },
+            replyHTML: replyHTMLMock,
+        } as unknown as Message<'chat' | 'pm'>;
+
+        privateHTML(message, '<b>test</b>', 'testroom', { name: 'test-box' });
+
+        expect(replyHTMLMock).toHaveBeenCalledWith('<b>test</b>', { name: 'test-box' });
+    });
+
+    it('falls back to a PM when replyHTML cannot send', () => {
+        const sendMock = vi.fn();
+        const room = new Room('testroom', {} as any);
+
+        const message = {
+            target: room,
+            author: { id: 'testuser', send: sendMock },
+            replyHTML: vi.fn().mockReturnValue(null),
+        } as unknown as Message<'chat' | 'pm'>;
+
+        privateHTML(message, '<b>test</b>', 'testroom');
+
+        expect(sendMock).toHaveBeenCalledWith('<b>test</b>');
     });
 });

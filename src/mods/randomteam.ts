@@ -21,7 +21,7 @@ export async function randomTeam(message: Message<'chat' | 'pm'>) {
 
     if (canUHTML(message)) {
         const html = `<div style="background:#0a0a0a;color:#e0e0e0;padding:10px;border-radius:8px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif"><img src="${data.image}" width="1200" height="630" style="max-width:100%;width:100%;height:auto;margin-bottom:8px;border-radius:4px" />${data.cardsHtml}</div>`;
-        message.reply(`/adduhtml ${html}`);
+        message.sendHTML(html);
     } else {
         message.reply(`Random team: ${data.url}`);
     }

@@ -25,7 +25,7 @@ export function showApologiesLeaderboard(message: Message<'chat' | 'pm'>) {
     try {
         const rows = db.prepare('SELECT * FROM apologies ORDER BY points DESC LIMIT 5').all() as Record<string, unknown>[];
         const htmlTable = `<table><tr><th>Name</th><th>Apologies</th></tr>${rows.map(row => `<tr><td>${row.name}</td><td>${row.points}</td></tr>`).join('')}</table>`;
-        message.reply(`!htmlbox ${htmlTable}`);
+        message.sendHTML(htmlTable);
     } catch (err) {
         logger.error({ cmd: 'apologyshow', message: 'Error getting from db', error: err });
     }

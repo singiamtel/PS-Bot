@@ -22,7 +22,7 @@ describe('generateRandomPokemon', () => {
 });
 
 describe('renderRandomPokemonHTML', () => {
-    it('renders a compact htmlbox body with the generated fields', () => {
+    it('renders a compact UHTML body with the generated fields', () => {
         const html = renderRandomPokemonHTML({
             name: 'Testmon',
             types: ['Fire', 'Ghost'],

@@ -29,7 +29,8 @@ export function isRoom(target: User | Room): target is Room {
 }
 
 export function canUHTML(message: Message<'chat' | 'pm'>) {
-    return message.type === 'chat' && isRoom(message.target) && message.target.auth && message.target.auth['*']?.includes(toID(config.name));
+    const uhtmlRanks = ['*', '#', '&'];
+    return message.type === 'chat' && isRoom(message.target) && uhtmlRanks.some(rank => message.target.auth?.[rank]?.includes(toID(config.name)));
 }
 
 export function inAllowedRooms(message: Message<'chat' | 'pm'>, rooms: string[]) {
@@ -53,6 +54,7 @@ export const commands = [
     'randopple',
     'randomteam', 'randteam',
     'randompokemon', 'randpokemon', 'randmon', 'fakemon',
+    'dt', 'dex', 'compactdt', 'dexcompact',
     'rank',
     'answerbox',
     'leaderboard',

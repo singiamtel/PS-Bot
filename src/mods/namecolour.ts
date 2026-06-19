@@ -1,11 +1,11 @@
 import namer from 'color-namer';
 import { determineColour, getCustomColourDetails, hexColorDelta } from '../namecolour.js';
 import type { Message } from 'ps-client';
-import { toID } from 'ps-client/tools.js';
+import { escapeHTML, toID } from 'ps-client/tools.js';
 import { canUHTML } from '../utils.js';
 
 function colourSwatch(colour: string) {
-    return `<span style="display:inline-block;width:10px;height:10px;background:${colour};border:1px solid #888;vertical-align:-1px"></span> ${colour}`;
+    return `<span style="display:inline-block;width:10px;height:10px;background:${escapeHTML(colour)};border:1px solid #888;vertical-align:-1px"></span> ${escapeHTML(colour)}`;
 }
 
 export function nameColour(message: Message<'chat' | 'pm'>, username: string | null | undefined) {
@@ -17,9 +17,9 @@ export function nameColour(message: Message<'chat' | 'pm'>, username: string | n
     const fixedDelta = (delta * 100).toFixed(2);
     if (canUHTML(message) && username) {
         const customColourHtml = customColour ?
-            `<br>Custom colour: ${colourSwatch(customColour.oldColour)} -> ${colourSwatch(customColour.newColour)} (from ${customColour.source})` :
+            `<br>Custom colour: ${colourSwatch(customColour.oldColour)} -> ${colourSwatch(customColour.newColour)} (from ${escapeHTML(customColour.source)})` :
             '';
-        return message.reply(`/adduhtml NAMECOLOUR-${displayname}, <username>${displayname}</username>: ${nameColour}${customColourHtml}<br> I think that's <strong style="color:#${colour.hex}; ">${colour.name}</strong> (${fixedDelta}% match)`);
+        return message.sendHTML(`<username>${escapeHTML(displayname)}</username>: ${escapeHTML(nameColour)}${customColourHtml}<br> I think that's <strong style="color:#${escapeHTML(colour.hex)}; ">${escapeHTML(colour.name)}</strong> (${fixedDelta}% match)`, { name: `NAMECOLOUR-${displayname}` });
     } else {
         const customColourText = customColour ?
             `${displayname} has a custom colour: ${customColour.oldColour} -> ${customColour.newColour} (from ${customColour.source}). ` :
@@ -35,6 +35,6 @@ export function compareColours(message: Message<'chat' | 'pm'>, username: string
     const delta = hexColorDelta(colour1, colour2);
     const fixedDelta = (delta * 100).toFixed(2);
     if (canUHTML(message) && username) {
-        return message.reply(`/adduhtml COLOURCOMPARE-${name1}-${name2}, <username>${name1}</username> (${colour1}) and <username>${name2}</username> (${colour2}) are ~${fixedDelta}% similar`);
+        return message.sendHTML(`<username>${escapeHTML(name1)}</username> (${escapeHTML(colour1)}) and <username>${escapeHTML(name2)}</username> (${escapeHTML(colour2)}) are ~${fixedDelta}% similar`, { name: `COLOURCOMPARE-${toID(name1)}-${toID(name2)}` });
     } else { return message.reply(`${name1} (${colour1}) and ${name2} (${colour2}) are ~${fixedDelta}% similar`); }
 }

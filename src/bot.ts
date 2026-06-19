@@ -40,12 +40,12 @@ export function roomAtLeast(minRank: Rank, message: Message<'chat' | 'pm'>, room
     const authObject = client.getRoom(room)?.auth;
     if (!authObject) {
         logger.error({ cmd: 'bot', message: 'No auth object found in room', room });
-        privateHTML(message, permsDeniedBox(minRank), room);
+        privateHTML(message, permsDeniedBox(minRank), room, { name: 'permission-denied' });
         return false;
     }
     const authList = Object.entries(authObject).filter(([rank, _userArray]) => rankOrder[rank as keyof typeof rankOrder] >= rankOrder[minRank]).map(([_rank, userArray]) => userArray).flat().map(toID);
     const hasPerms = authList.includes(toID(message.author.id));
-    if (!hasPerms) privateHTML(message, permsDeniedBox(minRank), room);
+    if (!hasPerms) privateHTML(message, permsDeniedBox(minRank), room, { name: 'permission-denied' });
     return hasPerms;
 }
 
@@ -53,13 +53,13 @@ export function roomAtLeast(minRank: Rank, message: Message<'chat' | 'pm'>, room
 export function atLeast(rank: Rank, message: Message<'chat' | 'pm'>, quiet = false) {
     if (config.whitelist.includes(toID(message.author.name))) return true; // whitelist
     if (message.msgRank === undefined) {
-        if (!quiet) privateHTML(message, permsDeniedBox(rank), isRoom(message.target) ? message.target.roomid : '');
+        if (!quiet) privateHTML(message, permsDeniedBox(rank), isRoom(message.target) ? message.target.roomid : '', { name: 'permission-denied' });
         return false;
     }
     const hasPerms = rankOrder[message.msgRank] >= rankOrder[rank];
     if (!hasPerms && !quiet) {
         logger.warn({ cmd: 'chat', error: 'User does not have permission', username: toID(message.author.name), rank: message.msgRank, requiredRank: rank, message: message.content });
-        privateHTML(message, permsDeniedBox(rank), isRoom(message.target) ? message.target.roomid : '');
+        privateHTML(message, permsDeniedBox(rank), isRoom(message.target) ? message.target.roomid : '', { name: 'permission-denied' });
     }
     return hasPerms;
 }
@@ -69,11 +69,17 @@ export function reply(message: Message<'chat' | 'pm'>, content: string) {
     return message.reply(content);
 }
 
-export function privateHTML(message: Message<'chat' | 'pm'>, content: string, room: string) {
-    if (!isRoom(message.target)) return message.author.send(content);
-    const sent = message.replyHTML(content, { name: 'help' });
+type PrivateHTMLOptions = {
+    name?: string;
+    change?: boolean;
+    notransform?: boolean;
+};
+
+export function privateHTML(message: Message<'chat' | 'pm'>, content: string, room: string, options: PrivateHTMLOptions = {}) {
+    const htmlOptions = !isRoom(message.target) && room ? { ...options, room } : options;
+    const sent = typeof message.replyHTML === 'function' ? message.replyHTML(content, htmlOptions) : null;
     if (sent) return sent;
-    return message.reply(`/msgroom ${room},/sendprivatehtmlbox  ${message.author.id}, ${content.replace(/\n\s*/g, ' ')}`);
+    return message.author.send(content.replace(/\n\s*/g, ' '));
 }
 
 logger.info({ cmd: 'bot', message: 'Loaded config', config });
