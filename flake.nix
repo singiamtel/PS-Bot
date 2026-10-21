@@ -9,11 +9,26 @@
   outputs = { self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ (final: prev: {
+            cacert = prev.cacert.override {
+              blacklist = [ "Comodo AAA Services root" "emSign ECC Root CA - G3" ];
+            };
+          }) ];
+        };
         root = ./.;
+        secureNode = pkgs.writeShellScriptBin "node" ''
+          export SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
+          export SSL_CERT_DIR=${pkgs.emptyDirectory}
+          exec ${pkgs.nodejs}/bin/node --use-openssl-ca "$@"
+        '';
       in
       {
         devShell = pkgs.mkShell {
+          SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+          SSL_CERT_DIR = "${pkgs.emptyDirectory}";
+          NODE_OPTIONS = "--use-openssl-ca";
           buildInputs = with pkgs; [
             nodejs
             python3
@@ -30,7 +45,9 @@
             buildInputs = [ pkgs.nodejs ];
 
             buildPhase = ''
-              export NODE_EXTRA_CA_CERTS=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
+              export SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
+              export SSL_CERT_DIR=${pkgs.emptyDirectory}
+              export NODE_OPTIONS=--use-openssl-ca
               export HOME=$TMPDIR/home
               mkdir -p $HOME
               runHook preBuild
@@ -56,7 +73,9 @@
 
         apps.default = {
             type = "app";
-            program = "${pkgs.nodejs}/bin/node ${self.packages.${system}.PS-bot}/dist/main.js";
+            program = toString (pkgs.writeShellScript "ps-bot" ''
+              exec ${secureNode}/bin/node ${self.packages.${system}.PS-bot}/dist/main.js "$@"
+            '');
             # Ensure the working directory is set correctly
             workingDirectory = "${self.packages.${system}.PS-bot}";
         };
@@ -64,7 +83,7 @@
         services = {
           PS-bot = {
             enable = true;
-            script = "${pkgs.nodejs}/bin/node ${self.packages.${system}.PS-bot}/dist/main.js";
+            script = "${secureNode}/bin/node ${self.packages.${system}.PS-bot}/dist/main.js";
             serviceConfig = {
               Restart = "always";
               RestartSec = "5s";
